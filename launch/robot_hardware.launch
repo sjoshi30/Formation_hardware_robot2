@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<launch>
+    
+     # ls -l /dev |grep ttyACM
+     # sudo chmod 666 /dev/ttyACM0
+     # rosrun rosserial_python serial_node.py /dev/ttyACM0
+     
+     <!-- <node pkg ="robot_hardware" name = "arduino_node" type = "arduino_node.py" output = "screen" /> -->
+
+     <!-- <node pkg = "rosserial_python" name = "serial_node" type = "serial_node.py" args = "/dev/ttyACM0" output = "screen" /> -->
+
+     <!-- <node pkg ="robot_hardware" name = "robot_control" type = "RobotControl.py" output = "screen" >
+        <param name="param_path" value = "$(find robot_hardware)/params/params.yaml" />
+     </node> -->
+
+     <node pkg = "robot_hardware" name = "diff_tf2" type = "diff_tf2" output = "screen" />
+
+     <!--<param name="kp_v"    value = "0.5" />
+     <param name="ki_v"    value = "0" />
+     <param name="kd_v"    value = "5" />
+     <param name="kp_w"    value = "2" />
+     <param name="ki_w"    value = "0" />
+     <param name="kd_w"    value = "10" />
+     <node pkg = "robot_hardware" name = "outerloop2" type = "outerloop2" output = "screen" /> -->
+
+    
+     <!-- Only for 50:1 motors -->
+     <node pkg="rosserial_python" type="serial_node.py" name="rosserial_lipo" output="screen">
+        <param name="~port" value="/dev/ttyACM0" />
+        <param name="~baudrate" value="115200" /> <!-- change 115200 for 50:1 motors -->
+     </node>  
+        
+     
+
+
+     <!-- Enter your AprilTag information below. Add all tag IDs that will be used, with their sizes -->
+     <!-- <node pkg="apriltags_ros" type="apriltag_detector_node" name="apriltag_detector" output="screen" ns="camera">
+      <param name="~viewer" value="false" />
+      <param name="~publish_detections_iamge" value="false" />
+      <param name="~display_type" value="CUBE" />
+      <param name="~marker_thickness" value = "0.02" />
+
+      <rosparam command="delete" param="tag_data" />
+      <rosparam param="tag_descriptions">[
+       {id: 0, size: 0.028},
+       {id: 1, size: 0.081},
+       {id: 2, size: 0.081},
+       {id: 3, size: 0.081},
+       {id: 4, size: 0.081},
+       {id: 5, size: 0.081},
+       {id: 6, size: 0.054},
+       {id: 7, size: 0.054},
+       {id: 8, size: 0.054},
+       {id: 9, size: 0.054},
+       {id: 10, size: 0.054},
+       {id: 11, size: 0.054},
+       {id: 12, size: 0.054},
+       {id: 13, size: 0.054},
+       {id: 14, size: 0.054},
+       {id: 15, size: 0.054},
+       ]
+      </rosparam>
+      <remap from="image_rect" to="/usb_cam/image_raw"/>    
+      <remap from="~camera_info" to="/usb_cam/camera_info"/>
+      <remap from="~marker_array" to="/apriltags/marker_array"/>
+      <remap from="~detections" to="/apriltags/detections"/> 
+     </node> -->
+
+    <!-- <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+     # Use ls -ltr /dev/video*
+     <param name="video_device" value="/dev/video2" />
+     <param name="image_width" value="640" />
+     <param name="image_height" value="480" />
+     <param name="pixel_format" value="yuyv" /> 
+     <param name="camera_frame_id" value="usb_cam" />
+     <param name="io_method" value="mmap"/>
+    </node>
+
+    <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
+     <remap from="image" to="camera/tag_detections_image" />  
+     <param name="autosize" value="true" /> 
+    </node> --> 
+
+
+    <!--      "/usb_cam/image_raw"/> -->
+
+</launch> 

@@ -1,0 +1,149 @@
+<?xml version="1.0"?>
+<launch>
+    
+     # ls -l /dev |grep ttyACM
+     # sudo chmod 666 /dev/ttyACM0
+     # rosrun rosserial_python serial_node.py /dev/ttyACM0
+
+    <param name="/use_sim_time" value="false"/> 
+
+    <!-- <include file="$(find multirobot_orca)/launch/robot.launch"> 
+      <arg name="init_pose" value="-x 0 -y -5 -z 0.0 " />     
+      <arg name="robot_name" value="robot1" />
+    </include> -->   
+     
+    <include file="$(find astra_launch)/launch/astra.launch"/>
+
+    <!-- run pointcloud_to_laserscan node -->
+    <!-- <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
+        <remap from="cloud_in" to="/camera/depth/points" />
+        <remap from="scan" to="base_scan" />
+        <rosparam>
+            target_frame: camera_link # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.01
+            min_height: 0.0
+            max_height: 1.0
+
+            angle_min: -1.5708 # -M_PI/2
+            angle_max: 1.5708 # M_PI/2
+            angle_increment: 0.0087 # M_PI/360.0
+            scan_time: 0.3333
+            range_min: 0.45
+            range_max: 4.0
+            use_inf: true
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+    </node> -->
+
+    <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan" >
+        <remap from="image" to="camera/depth/image_raw" />
+        <remap from="scan"  to="base_scan" />
+        <param name="output_frame_id" value="camera_depth_frame"/>
+    </node> 
+
+    <node pkg = "robot_hardware" name = "diff_tf2" type = "diff_tf2" output = "screen" />
+
+    <node pkg="rosserial_python" type="serial_node.py" name="rosserial_lipo" output="screen">
+        <param name="~port" value="/dev/ttyACM0" />
+        <param name="~baudrate" value="115200" /> <!-- change 115200 for 50:1 motors -->
+    </node>
+
+    <!-- transformation between camera_link and base_link-->
+    <node pkg="tf" type="static_transform_publisher" name="camera_to_base" args="0.12 0 0 0 0 0 /base_link /camera_link 20" /> 
+  
+    <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
+      <remap from="image" to="camera/depth/image_raw" />  <!--"/usb_cam/image_raw"/> --> 
+      <param name="autosize" value="true" /> 
+    </node>  
+
+
+    <!--GMapping does not publish geometry_msgs/PoseWithCovarianceStamped message as robot_pose_ekf and other packages do. Instead it provide transformation from map frame to odom frame. In combination    with transformation from odom frame to robot base frame (provided by your odometry) you have estimation of your robot pose. -->
+    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen" >
+      <remap from="scan" to="base_scan"/>
+      <param name="map_frame" value="map"/>
+      <param name="odom_frame" value="odom"/>
+      <param name="base_frame" value="base_link"/>
+      <param name="map_update_interval" value="2.0"/>
+      <param name="maxUrange" value="6.0"/>
+      <param name="maxRange" value="8.0"/>
+      <param name="sigma" value="0.05"/>
+      <param name="kernelSize" value="1"/>
+      <param name="lstep" value="0.05"/>
+      <param name="astep" value="0.05"/>
+      <param name="iterations" value="5"/>
+      <param name="lsigma" value="0.075"/>
+      <param name="ogain" value="3.0"/>
+      <param name="lskip" value="0"/>
+      <param name="srr" value="0.01"/>
+      <param name="srt" value="0.02"/>
+      <param name="str" value="0.01"/>
+      <param name="stt" value="0.02"/>
+      <param name="linearUpdate" value="0.25"/>
+      <param name="angularUpdate" value="0.262"/>
+      <param name="temporalUpdate" value="-1"/> <!-- 0.1 (kobuki) -->
+      <param name="resampleThreshold" value="0.5"/>
+      <param name="particles" value="300"/>
+      <param name="xmin" value="-50.0"/>
+      <param name="ymin" value="-50.0"/>
+      <param name="xmax" value="50.0"/>
+      <param name="ymax" value="50.0"/>
+      <param name="delta" value="0.05"/>
+      <param name="llsamplerange" value="0.01"/>
+      <param name="llsamplestep" value="0.01"/>
+      <param name="lasamplerange" value="0.005"/>
+      <param name="lasamplestep" value="0.005"/>
+      <!-- <param name="minimumScore" value="100"/> --> <!-- 0.005 (kobuki)-->
+    </node>
+
+    <!-- Run AMCL -->
+    <!-- <include file="$(find robot_hardware)/launch/includes/amcl.launch.xml" /> -->
+
+    <!--<remap from="cmd_vel" to="mobile_base/commands/velocity"/> for kobuki --> 
+    <!--param name="base_local_planner" value="eband_local_planner/EBandPlannerROS" /-->
+
+
+    <!-- Goal point published to /move_base_simple/goal -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
+      <param name="footprint_padding" value="0.01" />
+      <param name="controller_frequency" value="5.0" />
+      <param name="controller_patience" value="3.0" />
+      <param name="oscillation_timeout" value="30.0" />
+      <param name="oscillation_distance" value="0.5" />
+      <param name="planner_patience" value="1" />
+      <param name="controller_patience" value="1" /> 
+      
+      <param name="recovery_behavior_enabled" value="true" />
+      <param name="clearing_rotation_allowed" value="true" />
+          
+      <rosparam file="$(find multi_kobuki_gazebo)/launch/includes/costmap_common_params.yaml" command="load" ns="global_costmap" />
+      <rosparam file="$(find multi_kobuki_gazebo)/launch/includes/costmap_common_params.yaml" command="load" ns="local_costmap" />
+      <rosparam file="$(find multi_kobuki_gazebo)/launch/includes/local_costmap_params.yaml" command="load" />
+      <rosparam file="$(find multi_kobuki_gazebo)/launch/includes/global_costmap_params.yaml" command="load" />
+      <rosparam file="$(find multi_kobuki_gazebo)/launch/includes/base_local_planner_params.yaml" command="load" />  
+    
+      <param name="global_costmap/global_frame" value="map"/>
+      <param name="global_costmap/robot_base_frame" value="base_link"/>
+      <param name="global_costmap/laser_scan_sensor/sensor_frame" value="camera_depth_frame"/>
+      <param name="global_costmap/laser_scan_sensor/topic" value="base_scan"/>    
+  
+      <param name="local_costmap/global_frame" value="odom"/>
+      <param name="local_costmap/robot_base_frame" value="base_link"/>
+      <param name="local_costmap/laser_scan_sensor/sensor_frame" value="camera_depth_frame"/>
+      <param name="local_costmap/laser_scan_sensor/topic" value="base_scan"/>
+      <param name="local_costmap/obstacle_layer/laser_scan_sensor/topic" value="base_scan"/>
+    </node> 
+
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find robot_hardware)/robot_hardware_slam_1.rviz">
+       <!-- <remap from="move_base_simple/goal" to="robot1/move_base_simple/goal"/> -->
+    </node>
+
+
+
+    
+
+</launch> 

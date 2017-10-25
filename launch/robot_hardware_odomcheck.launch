@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<launch>
+    
+     # ls -l /dev |grep ttyACM
+     # sudo chmod 666 /dev/ttyACM0
+     # rosrun rosserial_python serial_node.py /dev/ttyACM0
+     
+     <!-- <node pkg ="robot_hardware" name = "arduino_node" type = "arduino_node.py" output = "screen" /> -->
+
+     <!-- <node pkg = "rosserial_python" name = "serial_node" type = "serial_node.py" args = "/dev/ttyACM0" output = "screen" /> -->
+
+     <!-- <node pkg ="robot_hardware" name = "robot_control" type = "RobotControl.py" output = "screen" >
+        <param name="param_path" value = "$(find robot_hardware)/params/params.yaml" />
+     </node> -->
+
+     <node pkg = "robot_hardware" name = "diff_tf2" type = "diff_tf2" output = "screen" />
+
+     <param name="kp_v"    value = "0.5" />
+     <param name="ki_v"    value = "0" />
+     <param name="kd_v"    value = "5" />
+     <param name="kp_w"    value = "2" />
+     <param name="ki_w"    value = "0" />
+     <param name="kd_w"    value = "10" />
+     <node pkg = "robot_hardware" name = "outerloop" type = "outerloop" output = "screen" /> 
+
+    
+     <!-- Only for 50:1 motors -->
+     <node pkg="rosserial_python" type="serial_node.py" name="rosserial_lipo" output="screen">
+        <param name="~port" value="/dev/ttyACM0" />
+        <param name="~baudrate" value="115200" /> <!-- change 115200 for 50:1 motors -->
+     </node>  
+        
+    <!--      "/usb_cam/image_raw"/> -->
+
+</launch> 
