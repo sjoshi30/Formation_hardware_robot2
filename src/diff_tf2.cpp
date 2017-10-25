@@ -46,7 +46,6 @@ private:
         double vd ;
         double wd ;
 
-        void twist_odom_callback(const geometry_msgs::Twist::ConstPtr& msg);
         void arduino_rpm_callback(const geometry_msgs::Vector3Stamped& rpm);
 	void init_variables();
 	void update();
