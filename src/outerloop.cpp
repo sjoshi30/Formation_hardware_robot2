@@ -172,7 +172,7 @@ void outerloop_calc::update()
             //z_p = z ;
             //pref_out_p = pref_out ;
 
-            dist_error = 0.28 - x_odom ;
+            dist_error = 1 - x_odom ;
             //omega_error = 0 - x ;
 
             // PD (normal controller)

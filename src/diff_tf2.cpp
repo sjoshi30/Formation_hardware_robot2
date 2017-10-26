@@ -58,10 +58,10 @@ Odometry_calc::Odometry_calc()
 	ROS_INFO("Started odometry computing node");
 
         // Subscribe
-        arduino_rpm_sub = n.subscribe("/arduino_vel",1000,&Odometry_calc::arduino_rpm_callback, this);
+        arduino_rpm_sub = n.subscribe("/arduino_vel",50,&Odometry_calc::arduino_rpm_callback, this);
  
         // Publish
-  	odom_pub = n.advertise<nav_msgs::Odometry>("odom", 500);   
+  	odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);   
 }
 
 void Odometry_calc::init_variables()
@@ -74,7 +74,7 @@ void Odometry_calc::init_variables()
         arduino_vd = 0 ;
         arduino_wd = 0 ;
 
-	rate = 20;
+	rate = 10;
 
 	t_delta = ros::Duration(1.0 / rate);
 	t_next = ros::Time::now() + t_delta;
@@ -124,10 +124,10 @@ void Odometry_calc::update()
                 arduino_vd = Radius*(arduino_wL + arduino_wR)/2 ;
                 arduino_wd = Radius*(arduino_wL - arduino_wR)/Length ;
                
-                dxy    = arduino_vd*arduino_dt ;
-                dtheta = arduino_wd*arduino_dt ;
-                dx =  cos(dtheta)*dxy ;
-                dy = -sin(dtheta)*dxy ;
+                dxy    = arduino_vd * elapsed ; //arduino_dt ;
+                dtheta = arduino_wd * elapsed ; //arduino_dt ;
+                dx =  cos(dtheta) * dxy ;
+                dy = -sin(dtheta) * dxy ;
                 x_final = x_final + (cos(theta_final)*dx - sin(theta_final)*dy) ;
                 y_final = y_final + (sin(theta_final)*dx + cos(theta_final)*dy) ;
                 theta_final = theta_final + dtheta ;
@@ -161,7 +161,7 @@ void Odometry_calc::update()
 		odom.pose.pose.position.y = y_final;
 		odom.pose.pose.position.z = 0.0;
 		odom.pose.pose.orientation = tf::createQuaternionMsgFromYaw(theta_final);
-                if (arduino_wL == 0 && arduino_wR == 0)
+                /*if (arduino_wL == 0 && arduino_wR == 0)
                 {
                    odom.pose.covariance[0] = 1e-9;
                    odom.pose.covariance[7] = 1e-3;
@@ -194,12 +194,13 @@ void Odometry_calc::update()
                    odom.twist.covariance[21] = 1e6;
                    odom.twist.covariance[28] = 1e6;
                    odom.twist.covariance[35] = 1e3;
-                }
-                odom_vd = (arduino_dt == 0) ? 0 : dxy/arduino_dt ;
-                odom_wd = (arduino_dt == 0) ? 0 : dtheta/arduino_dt ; 
-                odom.twist.twist.linear.x = odom_vd;
+                }*/
+
+                //odom_vd = (arduino_dt == 0) ? 0 : dxy/arduino_dt ;
+                //odom_wd = (arduino_dt == 0) ? 0 : dtheta/arduino_dt ; 
+                odom.twist.twist.linear.x = arduino_vd;
 		odom.twist.twist.linear.y = 0;
-		odom.twist.twist.angular.z = odom_wd;
+		odom.twist.twist.angular.z = arduino_wd;
 
                 odom_pub.publish(odom);
                 then = now;

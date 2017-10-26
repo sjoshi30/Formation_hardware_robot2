@@ -5,7 +5,7 @@
      # sudo chmod 666 /dev/ttyACM0
      # rosrun rosserial_python serial_node.py /dev/ttyACM0
 
-    <param name="/use_sim_time" value="false"/> 
+    <!-- <param name="/use_sim_time" value="false"/>  -->
 
     <!-- <include file="$(find multirobot_orca)/launch/robot.launch"> 
       <arg name="init_pose" value="-x 0 -y -5 -z 0.0 " />     
@@ -48,13 +48,13 @@
 
     <node pkg = "robot_hardware" name = "diff_tf2" type = "diff_tf2" output = "screen" />
 
-    <node pkg="rosserial_python" type="serial_node.py" name="rosserial_lipo" output="screen">
+    <node name="rosserial_lipo" pkg="rosserial_python" type="serial_node.py" output="screen">
         <param name="~port" value="/dev/ttyACM0" />
-        <param name="~baudrate" value="115200" /> <!-- change 115200 for 50:1 motors -->
+        <param name="~baudrate" value="57600" /> <!-- change 115200 for 50:1 motors -->
     </node>
 
     <!-- transformation between camera_link and base_link-->
-    <node pkg="tf" type="static_transform_publisher" name="camera_to_base" args="0.12 0 0 0 0 0 /base_link /camera_link 20" /> 
+    <node pkg="tf" type="static_transform_publisher" name="camera_to_base" args="0.12 0 0 0 0 0 /base_link /camera_link 100" /> 
   
     <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
       <remap from="image" to="camera/depth/image_raw" />  <!--"/usb_cam/image_raw"/> --> 
@@ -68,14 +68,14 @@
       <param name="map_frame" value="map"/>
       <param name="odom_frame" value="odom"/>
       <param name="base_frame" value="base_link"/>
-      <param name="map_update_interval" value="2.0"/>
+      <param name="map_update_interval" value="0.1"/>
       <param name="maxUrange" value="6.0"/>
       <param name="maxRange" value="8.0"/>
-      <param name="sigma" value="0.05"/>
-      <param name="kernelSize" value="1"/>
+      <param name="sigma" value="0.5"/> <!-- 0.05 -->
+      <param name="kernelSize" value="0.01"/> <!-- 1 -->
       <param name="lstep" value="0.05"/>
       <param name="astep" value="0.05"/>
-      <param name="iterations" value="5"/>
+      <param name="iterations" value="20"/> <!-- 5 -->
       <param name="lsigma" value="0.075"/>
       <param name="ogain" value="3.0"/>
       <param name="lskip" value="0"/>
@@ -83,22 +83,23 @@
       <param name="srt" value="0.02"/>
       <param name="str" value="0.01"/>
       <param name="stt" value="0.02"/>
-      <param name="linearUpdate" value="0.25"/>
-      <param name="angularUpdate" value="0.262"/>
-      <param name="temporalUpdate" value="-1"/> <!-- 0.1 (kobuki) -->
-      <param name="resampleThreshold" value="0.5"/>
-      <param name="particles" value="300"/>
+      <param name="linearUpdate" value="0.01"/> <!-- 0.25 -->
+      <param name="angularUpdate" value="0.01"/> <!-- 0.262 -->
+      <param name="temporalUpdate" value="0.1"/> <!-- 0.1 (kobuki) -->
+      <param name="resampleThreshold" value="0.1"/> <!-- 0.5 -->
+      <param name="particles" value="100"/>
       <param name="xmin" value="-50.0"/>
       <param name="ymin" value="-50.0"/>
       <param name="xmax" value="50.0"/>
       <param name="ymax" value="50.0"/>
-      <param name="delta" value="0.05"/>
+      <param name="delta" value="0.05"/> <!-- 0.05 -->
       <param name="llsamplerange" value="0.01"/>
       <param name="llsamplestep" value="0.01"/>
       <param name="lasamplerange" value="0.005"/>
       <param name="lasamplestep" value="0.005"/>
-      <!-- <param name="minimumScore" value="100"/> --> <!-- 0.005 (kobuki)-->
-    </node>
+      <param name="transform_publish_period" value="0.05"/>
+      <param name="minimumScore" value="100"/>  <!-- 0.005 (kobuki)-->
+    </node> 
 
     <!-- Run AMCL -->
     <!-- <include file="$(find robot_hardware)/launch/includes/amcl.launch.xml" /> -->
@@ -108,13 +109,15 @@
 
 
     <!-- Goal point published to /move_base_simple/goal -->
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
+    <!-- <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
       <param name="footprint_padding" value="0.01" />
+
       <param name="controller_frequency" value="5.0" />
       <param name="controller_patience" value="3.0" />
       <param name="oscillation_timeout" value="30.0" />
       <param name="oscillation_distance" value="0.5" />
-      <param name="planner_patience" value="1" />
+      <param name="planner_frequency" value="1.0" />
+      <param name="planner_patience" value="5" />
       <param name="controller_patience" value="1" /> 
       
       <param name="recovery_behavior_enabled" value="true" />
@@ -136,11 +139,11 @@
       <param name="local_costmap/laser_scan_sensor/sensor_frame" value="camera_depth_frame"/>
       <param name="local_costmap/laser_scan_sensor/topic" value="base_scan"/>
       <param name="local_costmap/obstacle_layer/laser_scan_sensor/topic" value="base_scan"/>
-    </node> 
+    </node> -->
 
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find robot_hardware)/robot_hardware_slam_1.rviz">
-       <!-- <remap from="move_base_simple/goal" to="robot1/move_base_simple/goal"/> -->
-    </node>
+      <!-- <remap from="move_base_simple/goal" to="robot1/move_base_simple/goal"/> --> 
+    </node> 
 
 
 
