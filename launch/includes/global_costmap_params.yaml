@@ -2,8 +2,8 @@ global_costmap:
 
   global_frame: /map
   robot_base_frame: /base_link
-  update_frequency: 1.0 # 2
-  publish_frequency: 0.5 # 2
+  update_frequency: 1 # 2 The frequency in Hz for the map to be updated. (THIS CAUSES THE ERROR) 
+  publish_frequency: 5 # 2 The frequency in Hz for the map to be publish display information. 
   static_map: true
   trasform_tolerance: 0.5 #added
 

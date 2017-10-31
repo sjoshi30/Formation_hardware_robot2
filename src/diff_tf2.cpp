@@ -74,7 +74,7 @@ void Odometry_calc::init_variables()
         arduino_vd = 0 ;
         arduino_wd = 0 ;
 
-	rate = 10;
+	rate = 20;
 
 	t_delta = ros::Duration(1.0 / rate);
 	t_next = ros::Time::now() + t_delta;

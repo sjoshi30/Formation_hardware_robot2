@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<launch>
+    
+     # ls -l /dev |grep ttyACM
+     # sudo chmod 666 /dev/ttyACM0 (ARDUINO)
+     # sudo chmod 666 /dev/ttyUSB0 (RPLIDAR)
+     # rosrun rosserial_python serial_node.py /dev/ttyACM0
+
+    <param name="/use_sim_time" value="false"/>    
+     
+    <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+
+    <node pkg = "robot_hardware" name = "diff_tf2" type = "diff_tf2" output = "screen" /> 
+
+    <node name="rosserial_lipo" pkg="rosserial_python" type="serial_node.py" output="screen">
+        <param name="~port" value="/dev/ttyACM0" />
+        <param name="~baudrate" value="115200" /> <!-- change 115200 for 50:1 motors -->
+    </node>
+
+    <!-- transformation between camera_link and base_link-->
+    <!-- <node pkg="tf" type="static_transform_publisher" name="camera_to_base" args="0.12 0 0 0 0 0 /base_link /camera_link 100" /> -->
+    <node name="base_link_to_laser" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 /base_link /laser 10" />
+
+  
+
+    <include file="$(find hector_slam_launch)/launch/tutorial.launch"/> 
+
+    <!-- Goal point published to /move_base_simple/goal -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
+
+      <param name="footprint_padding" value="0.01" />
+      <param name="controller_frequency" value="5.0" /> <!-- The rate in Hz at which to run the control loop and send velocity commands to the base. -->
+      <param name="controller_patience" value="3.0" /> <!-- How long the controller will wait in seconds without receiving a valid control before space-clearing operations are performed.  -->
+      <param name="oscillation_timeout" value="30.0" /> <!-- How long in seconds to allow for oscillation before executing recovery behaviors. A value of 0.0 corresponds to an infinite timeout -->
+      <param name="oscillation_distance" value="0.5" /> <!-- How far in meters the robot must move to be considered not to be oscillating -->
+      <param name="planner_frequency" value="0.0" /> <!-- The rate in Hz at which to run the global planning loop. If the frequency is set to 0.0, the global planner will only run when a new goal is received or the local planner reports that its path is blocked -->
+      <param name="planner_patience" value="1" />  <!-- How long the planner will wait in seconds in an attempt to find a valid plan before space-clearing operations are performed. -->
+      <param name="controller_patience" value="1" /> <!-- How long the controller will wait in seconds without receiving a valid control before space-clearing operations are performed.  -->
+      
+      <param name="recovery_behavior_enabled" value="true" />
+      <param name="clearing_rotation_allowed" value="true" />
+          
+      <rosparam file="$(find robot_hardware)/launch/includes/costmap_common_params.yaml" command="load" ns="global_costmap" />
+      <rosparam file="$(find robot_hardware)/launch/includes/costmap_common_params.yaml" command="load" ns="local_costmap" />
+      <rosparam file="$(find robot_hardware)/launch/includes/local_costmap_params.yaml" command="load" />
+      <rosparam file="$(find robot_hardware)/launch/includes/global_costmap_params.yaml" command="load" />
+      <rosparam file="$(find robot_hardware)/launch/includes/base_local_planner_params.yaml" command="load" />  
+    
+      <param name="global_costmap/global_frame" value="map"/>
+      <param name="global_costmap/robot_base_frame" value="base_link"/>
+      <param name="global_costmap/laser_scan_sensor/sensor_frame" value="laser"/>
+      <param name="global_costmap/laser_scan_sensor/topic" value="scan"/>    
+  
+      <param name="local_costmap/global_frame" value="odom"/>
+      <param name="local_costmap/robot_base_frame" value="base_link"/>
+      <param name="local_costmap/laser_scan_sensor/sensor_frame" value="laser"/>
+      <param name="local_costmap/laser_scan_sensor/topic" value="scan"/>
+      <param name="local_costmap/obstacle_layer/laser_scan_sensor/topic" value="scan"/>
+    </node> 
+
+    <!--<remap from="move_base_simple/goal" to="robot1/move_base_simple/goal"/> -->
+    <!--<node pkg="rviz" type="rviz" name="rviz" args="-d $(find robot_hardware)/robot_hardware_slam_1.rviz">
+    </node> --> 
+
+    
+
+
+
+    
+
+</launch> 
