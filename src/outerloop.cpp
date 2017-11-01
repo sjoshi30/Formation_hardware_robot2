@@ -122,7 +122,7 @@ void outerloop_calc::init_variables()
         dist_error = 0; dist_error_p  = 0 ; dist_error_pp  = 0 ;
         omega_error = 0;omega_error_p = 0 ; omega_error_pp = 0 ;
 
-	rate = 20 ; 
+	rate = 10 ; 
         td   = 1/rate ;
         alpha = 600 ;
 
@@ -173,11 +173,11 @@ void outerloop_calc::update()
             //pref_out_p = pref_out ;
 
             dist_error = 1 - x_odom ;
-            //omega_error = 0 - x ;
+            omega_error = 0 - y_odom ;
 
             // PD (normal controller)
             vd_ctrl = kp_v*dist_error + kd_v*(dist_error - dist_error_p)/td    ;
-            wd_ctrl = 0 ; //kp_w*omega_error + kd_w*(omega_error - omega_error_p)/td ;
+            wd_ctrl = kp_w*omega_error + kd_w*(omega_error - omega_error_p)/td ;
 
             geometry_msgs::Twist cmd_data ;
             cmd_data.linear.x = vd_ctrl ; // "-ve" to make control signal positive

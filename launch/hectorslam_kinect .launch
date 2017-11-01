@@ -26,7 +26,7 @@
     <node pkg="tf" type="static_transform_publisher" name="camera_to_base" args="0.12 0 0 0 0 0 /base_link /camera_link 100" /> 
   
     <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
-      <remap from="image" to="camera/depth/image_raw" />  <!--"/usb_cam/image_raw"/> --> 
+      <remap from="image" to="camera/depth/image_raw" />   <!--"/usb_cam/image_raw"/> --> 
       <param name="autosize" value="true" /> 
     </node>  
 
@@ -77,6 +77,45 @@
       
     </node> --> 
 
+<!-- 
+
+('D = ', [-0.07232943300401876, 0.131167157747717, 0.0009812521268084834, 0.006126998994195763, 0.0])
+('K = ', [558.7119569117442, 0.0, 323.32285628006747, 0.0, 562.5328533211821, 246.9020861000646, 0.0, 0.0, 1.0])
+('R = ', [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0])
+('P = ', [556.248779296875, 0.0, 326.4721206534159, 0.0, 0.0, 563.2024536132812, 246.70880489899355, 0.0, 0.0, 0.0, 1.0, 0.0])
+None
+# oST version 5.0 parameters
+
+
+[image]
+
+width
+640
+
+height
+480
+
+[narrow_stereo]
+
+camera matrix
+558.711957 0.000000 323.322856
+0.000000 562.532853 246.902086
+0.000000 0.000000 1.000000
+
+distortion
+-0.072329 0.131167 0.000981 0.006127 0.000000
+
+rectification
+1.000000 0.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 0.000000 1.000000
+
+projection
+556.248779 0.000000 326.472121 0.000000
+0.000000 563.202454 246.708805 0.000000
+0.000000 0.000000 1.000000 0.000000
+
+-->
 
 
     
