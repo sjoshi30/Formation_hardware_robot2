@@ -29,7 +29,9 @@ private:
         double odom_wd ;
 
         ros::Subscriber arduino_rpm_sub ;
+        ros::Subscriber joy_sub ;
 	ros::Publisher odom_pub;
+        ros::Publisher cmd_vel_pub ;
 	tf::TransformBroadcaster odom_broadcaster;
 
 	double rate;
@@ -45,9 +47,13 @@ private:
 	double x_final,y_final, theta_final;
 
         double vd ;
-        double wd ;
+        double wd ; 
+        double joystick_vd ;
+        double joystick_wd ;
+        
 
         void arduino_rpm_callback(const geometry_msgs::Vector3Stamped& rpm);
+        void joystick_callback(const sensor_msgs::Joy::ConstPtr& joy);
 	void init_variables();
 	void update();
 };
@@ -61,8 +67,15 @@ Odometry_calc::Odometry_calc()
         // Subscribe
         arduino_rpm_sub = n.subscribe("/arduino_vel",50,&Odometry_calc::arduino_rpm_callback, this);
 
+        // Subcribe to joystick topic
+        joy_sub = n.subscribe("joy",10,&Odometry_calc::joystick_callback,this) ;
+        //joy_sub_ = nh_.subscribe<sensor_msgs::Joy>("joy", 10, &TeleopTurtle::joyCallback, this);
+ 
         // Publish
-  	odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);   
+  	odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50); 
+
+        // Publish cmd_vel
+        cmd_vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 50) ; 
 }
 
 void Odometry_calc::init_variables()
@@ -202,10 +215,20 @@ void Odometry_calc::update()
                 odom.twist.twist.linear.x = arduino_vd;
 		odom.twist.twist.linear.y = 0;
 		odom.twist.twist.angular.z = arduino_wd;
-
                 odom_pub.publish(odom);
+
+                geometry_msgs::Twist cmd_data ;
+                cmd_data.linear.x = joystick_vd ; // "-ve" to make control signal positive
+                cmd_data.linear.y = 0 ;
+                cmd_data.linear.z = 0 ;
+                cmd_data.angular.x = 0   ;      
+                cmd_data.angular.y = 0   ;     
+                cmd_data.angular.z = joystick_wd   ;     
+                cmd_vel_pub.publish(cmd_data); 
+
                 then = now;
                 ros::spinOnce();
+
           }
 }
             
@@ -217,7 +240,11 @@ void Odometry_calc::arduino_rpm_callback(const geometry_msgs::Vector3Stamped& rp
    arduino_timestamp = rpm.header.stamp ;
 }
 
-
+void Odometry_calc::joystick_callback(const sensor_msgs::Joy::ConstPtr& joy)
+{
+   joystick_vd = joy->axes[1] ;
+   joystick_wd = joy->axes[2] ;
+}
 
 int main(int argc, char **argv)
 {
