@@ -6,6 +6,9 @@
      # rosrun rosserial_python serial_node.py /dev/ttyACM0
      # rosrun map_server map_saver -f map /map:=/robot1/map
 
+     # sudo service ssh restart
+     # sudo ufw allow 22
+
     <param name="/use_sim_time" value="false"/> 
        
     <include file="$(find rplidar_ros)/launch/rplidar.launch" />
@@ -14,7 +17,7 @@
 	<param name="dev" type="str" value="/dev/input/js0"/>
     </node>
 
-    <node pkg = "robot_hardware" name = "diff_tf2" type = "diff_tf2" output = "screen" />
+    <node pkg = "robot_hardware" name = "diff_tf_joystick" type = "diff_tf_joystick" output = "screen" />
 
     <node name="rosserial_lipo" pkg="rosserial_python" type="serial_node.py" output="screen">
         <param name="~port" value="/dev/ttyACM0" />
@@ -37,7 +40,7 @@
       <param name="kernelSize" value="1"/> <!-- 1 --> <!-- The kernel in which to look for a correspondence -->
       <param name="lstep" value="0.05"/><!-- 0.05 --> <!-- The optimization step in translation  -->
       <param name="astep" value="0.05"/><!-- 0.05 --> <!-- The optimization step in rotation -->
-      <param name="iterations" value="5"/> <!-- 5 --> <!-- The number of iterations of the scanmatcher  -->
+      <param name="iterations" value="20"/> <!-- 5 --> <!-- The number of iterations of the scanmatcher  -->
       <param name="lsigma" value="0.075"/>
       <param name="ogain" value="3.0"/>
       <param name="lskip" value="0"/>
@@ -48,8 +51,8 @@
       <param name="linearUpdate" value="0.01"/> <!-- 0.25 -->
       <param name="angularUpdate" value="0.01"/> <!-- 0.262 -->
       <param name="temporalUpdate" value="-1"/> <!-- 0.1 (kobuki) -->
-      <param name="resampleThreshold" value="0.1"/> <!-- 0.5 -->
-      <param name="particles" value="300"/>
+      <param name="resampleThreshold" value="0.5"/> <!-- 0.5 -->
+      <param name="particles" value="100"/>
       <param name="xmin" value="-50.0"/>
       <param name="ymin" value="-50.0"/>
       <param name="xmax" value="50.0"/>
@@ -59,7 +62,7 @@
       <param name="llsamplestep" value="0.01"/>
       <param name="lasamplerange" value="0.005"/>
       <param name="lasamplestep" value="0.005"/>
-      <param name="transform_publish_period" value="0.1"/> <!-- How long (in seconds) between transform publications.  -->
+      <param name="transform_publish_period" value="0.05"/> <!-- How long (in seconds) between transform publications.  -->
       <param name="minimumScore" value="100"/>  <!-- 0.005 (kobuki)--> <!-- Minimum score for considering the outcome of the scan matching good -->
     </node> 
 
