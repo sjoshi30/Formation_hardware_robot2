@@ -21,7 +21,7 @@ TrajectoryPlannerROS:
 
   holonomic_robot: false
 
-  meter_scoring: false   #true
+  meter_scoring: true   #true
   dwa: false # added
   pdist_scale: 1.0 # added
   gdist_scale: 0.8 # added

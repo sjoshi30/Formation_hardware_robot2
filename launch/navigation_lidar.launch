@@ -21,7 +21,8 @@
     <node name="base_link_to_laser" pkg="tf" type="static_transform_publisher" args="0.12 0 0 0 0 0 /base_link /laser 10" />
 
     <!-- Run the map server -->
-    <node name="map_server" pkg="map_server" type="map_server" args="$(find robot_hardware)/map.yaml" >
+    <!-- map.yaml 0.05" -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find robot_hardware)/map.pgm 0.05" > 
         <param name="frame_id" value="/map" />
     </node>
   
@@ -30,14 +31,13 @@
 
     <!-- Goal point published to /move_base_simple/goal -->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
-      
       <rosparam file="$(find robot_hardware)/launch/includes/costmap_common_params.yaml" command="load" ns="global_costmap" />
       <rosparam file="$(find robot_hardware)/launch/includes/costmap_common_params.yaml" command="load" ns="local_costmap" />
       <rosparam file="$(find robot_hardware)/launch/includes/local_costmap_params.yaml" command="load" />
       <rosparam file="$(find robot_hardware)/launch/includes/global_costmap_params.yaml" command="load" />
       <rosparam file="$(find robot_hardware)/launch/includes/base_local_planner_params.yaml" command="load" />
       <rosparam file="$(find robot_hardware)/launch/includes/move_base_params.yaml" command="load" />
-      <rosparam file="$(find robot_hardware)/launch/includes/global_planner_params.yaml" command="load" />
+      <!-- <rosparam file="$(find robot_hardware)/launch/includes/global_planner_params.yaml" command="load" /> -->
       <rosparam file="$(find robot_hardware)/launch/includes/navfn_global_planner_params.yaml" command="load" />
 
       <param name="global_costmap/global_frame" value="map"/>
@@ -50,7 +50,6 @@
       <param name="local_costmap/laser_scan_sensor/sensor_frame" value="laser"/>
       <param name="local_costmap/laser_scan_sensor/topic" value="scan"/>
       <param name="local_costmap/obstacle_layer/laser_scan_sensor/topic" value="scan"/>
-
     </node> 
 
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find robot_hardware)/robot_hardware_nav_1.rviz">  
