@@ -5,7 +5,7 @@
      # sudo chmod 666 /dev/ttyACM0
      # rosrun rosserial_python serial_node.py /dev/ttyACM0
 
-    <!-- <param name="/use_sim_time" value="false"/>  -->
+    <param name="/use_sim_time" value="false"/>  
 
     <!-- <include file="$(find multirobot_orca)/launch/robot.launch"> 
       <arg name="init_pose" value="-x 0 -y -5 -z 0.0 " />     

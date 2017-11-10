@@ -4,7 +4,7 @@
      # ls -l /dev |grep ttyACM
      # sudo chmod 666 /dev/ttyACM0
      # rosrun rosserial_python serial_node.py /dev/ttyACM0
-     # rosrun map_server map_saver -f map /map:=/robot1/map
+     # rosrun map_server map_saver -f map /map:=map
 
      # sudo service ssh restart
      # sudo ufw allow 22
@@ -25,7 +25,7 @@
     </node>
 
     <!-- transformation between camera_link and base_link-->
-<node name="base_link_to_laser" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 /base_link /laser 10" />
+<node name="base_link_to_laser" pkg="tf" type="static_transform_publisher" args="0.12 0 0 0 0 0 /base_link /laser 10" />
   
     <!--GMapping does not publish geometry_msgs/PoseWithCovarianceStamped message as robot_pose_ekf and other packages do. Instead it provide transformation from map frame to odom frame. In combination    with transformation from odom frame to robot base frame (provided by your odometry) you have estimation of your robot pose. -->
     <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen" >
@@ -40,7 +40,7 @@
       <param name="kernelSize" value="1"/> <!-- 1 --> <!-- The kernel in which to look for a correspondence -->
       <param name="lstep" value="0.05"/><!-- 0.05 --> <!-- The optimization step in translation  -->
       <param name="astep" value="0.05"/><!-- 0.05 --> <!-- The optimization step in rotation -->
-      <param name="iterations" value="20"/> <!-- 5 --> <!-- The number of iterations of the scanmatcher  -->
+      <param name="iterations" value="5"/> <!-- 5 --> <!-- The number of iterations of the scanmatcher  -->
       <param name="lsigma" value="0.075"/>
       <param name="ogain" value="3.0"/>
       <param name="lskip" value="0"/>
@@ -52,7 +52,7 @@
       <param name="angularUpdate" value="0.01"/> <!-- 0.262 -->
       <param name="temporalUpdate" value="-1"/> <!-- 0.1 (kobuki) -->
       <param name="resampleThreshold" value="0.5"/> <!-- 0.5 -->
-      <param name="particles" value="100"/>
+      <param name="particles" value="50"/>
       <param name="xmin" value="-50.0"/>
       <param name="ymin" value="-50.0"/>
       <param name="xmax" value="50.0"/>
@@ -72,39 +72,7 @@
     <!--<remap from="cmd_vel" to="mobile_base/commands/velocity"/> for kobuki --> 
     <!--param name="base_local_planner" value="eband_local_planner/EBandPlannerROS" /-->
 
-    <!-- Goal point published to /move_base_simple/goal -->
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
-
-      <param name="footprint_padding" value="0.01"   />
-      <param name="controller_frequency" value="5.0" /> <!-- The rate in Hz at which to run the control loop and send velocity commands to the base. -->
-      <param name="controller_patience" value="3.0"  /> <!-- How long the controller will wait in seconds without receiving a valid control before space-clearing operations are performed.  -->
-      <param name="oscillation_timeout" value="30.0" /> <!-- How long in seconds to allow for oscillation before executing recovery behaviors. A value of 0.0 corresponds to an infinite timeout -->
-      <param name="oscillation_distance" value="0.5" /> <!-- How far in meters the robot must move to be considered not to be oscillating -->
-      <param name="planner_frequency" value="0.0"    /> <!-- The rate in Hz at which to run the global planning loop. If the frequency is set to 0.0, the global planner will only run when a new goal -->
-                                                        <!-- is received or the local planner reports that its path is blocked -->
-      <param name="planner_patience" value="1" />       <!-- How long the planner will wait in seconds in an attempt to find a valid plan before space-clearing operations are performed. -->
-      <param name="controller_patience" value="1" />    <!-- How long the controller will wait in seconds without receiving a valid control before space-clearing operations are performed.  -->
-      
-      <param name="recovery_behavior_enabled" value="true" />
-      <param name="clearing_rotation_allowed" value="true" />
-          
-      <rosparam file="$(find robot_hardware)/launch/includes/costmap_common_params.yaml" command="load" ns="global_costmap" />
-      <rosparam file="$(find robot_hardware)/launch/includes/costmap_common_params.yaml" command="load" ns="local_costmap" />
-      <rosparam file="$(find robot_hardware)/launch/includes/local_costmap_params.yaml" command="load" />
-      <rosparam file="$(find robot_hardware)/launch/includes/global_costmap_params.yaml" command="load" />
-      <rosparam file="$(find robot_hardware)/launch/includes/base_local_planner_params.yaml" command="load" />  
     
-      <param name="global_costmap/global_frame" value="map"/>
-      <param name="global_costmap/robot_base_frame" value="base_link"/>
-      <param name="global_costmap/laser_scan_sensor/sensor_frame" value="camera_depth_frame"/>
-      <param name="global_costmap/laser_scan_sensor/topic" value="base_scan"/>    
-  
-      <param name="local_costmap/global_frame" value="odom"/>
-      <param name="local_costmap/robot_base_frame" value="base_link"/>
-      <param name="local_costmap/laser_scan_sensor/sensor_frame" value="camera_depth_frame"/>
-      <param name="local_costmap/laser_scan_sensor/topic" value="base_scan"/>
-      <param name="local_costmap/obstacle_layer/laser_scan_sensor/topic" value="base_scan"/>
-    </node> 
 
 
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find robot_hardware)/robot_hardware_slam_1.rviz">
