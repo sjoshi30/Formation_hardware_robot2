@@ -15,20 +15,20 @@
 
      <node pkg = "robot_hardware" name = "diff_tf2" type = "diff_tf2" output = "screen" />
 
-     <param name="kp_v"    value = "0.5" />
-     <param name="ki_v"    value = "0" />
-     <param name="kd_v"    value = "5" />
-     <param name="kp_w"    value = "0.5" />
-     <param name="ki_w"    value = "0" />
-     <param name="kd_w"    value = "5" />
-     <node pkg = "robot_hardware" name = "outerloop" type = "outerloop" output = "screen" /> 
-
-    
-     <!-- Only for 50:1 motors -->
      <node pkg="rosserial_python" type="serial_node.py" name="rosserial_lipo" output="screen">
         <param name="~port" value="/dev/ttyACM0" />
-        <param name="~baudrate" value="115200" /> <!-- change 115200 for 50:1 motors -->
-     </node>  
+        <param name="~baudrate" value="115200" /> 
+     </node>
+
+     <param name="kp_v"    value = "0.5" />
+     <param name="ki_v"    value = "0" />
+     <param name="kd_v"    value = "1" />
+     <param name="kp_w"    value = "0.5" />
+     <param name="ki_w"    value = "0" />
+     <param name="kd_w"    value = "1" />
+     <node pkg = "robot_hardware" name = "outerloop" type = "outerloop" output = "screen" /> 
+
+       
         
     <!--      "/usb_cam/image_raw"/> -->
 

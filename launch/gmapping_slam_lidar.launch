@@ -24,8 +24,8 @@
         <param name="~baudrate" value="115200" /> <!-- change 115200 for 50:1 motors -->
     </node>
 
-    <!-- transformation between camera_link and base_link-->
-<node name="base_link_to_laser" pkg="tf" type="static_transform_publisher" args="0.12 0 0 0 0 0 /base_link /laser 10" />
+    <!-- transformation between laser_link and base_link-->
+    <node name="base_link_to_laser" pkg="tf" type="static_transform_publisher" args="0.12 0 0 3.14 0 0 /base_link /laser 10" /> 
   
     <!--GMapping does not publish geometry_msgs/PoseWithCovarianceStamped message as robot_pose_ekf and other packages do. Instead it provide transformation from map frame to odom frame. In combination    with transformation from odom frame to robot base frame (provided by your odometry) you have estimation of your robot pose. -->
     <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen" >
@@ -33,7 +33,7 @@
       <param name="map_frame" value="map"/>
       <param name="odom_frame" value="odom"/>
       <param name="base_frame" value="base_link"/>
-      <param name="map_update_interval" value="0.05"/>
+      <param name="map_update_interval" value="0.05"/> <!-- 0.05 -->
       <param name="maxUrange" value="6.0"/>
       <param name="maxRange" value="8.0"/>
       <param name="sigma" value="0.05"/> <!-- 0.05 --> <!-- The sigma used by the greedy endpoint matching  -->
@@ -52,12 +52,12 @@
       <param name="angularUpdate" value="0.01"/> <!-- 0.262 -->
       <param name="temporalUpdate" value="-1"/> <!-- 0.1 (kobuki) -->
       <param name="resampleThreshold" value="0.5"/> <!-- 0.5 -->
-      <param name="particles" value="50"/>
-      <param name="xmin" value="-50.0"/>
-      <param name="ymin" value="-50.0"/>
-      <param name="xmax" value="50.0"/>
-      <param name="ymax" value="50.0"/>
-      <param name="delta" value="0.05"/> <!-- 0.05 -->
+      <param name="particles" value="30"/>
+      <param name="xmin" value="-50.0"/> <!-- -50 -->
+      <param name="ymin" value="-50.0"/> <!-- -50 -->
+      <param name="xmax" value="50.0"/>  <!-- 50 -->
+      <param name="ymax" value="50.0"/> <!-- 50 -->
+      <param name="delta" value="0.1"/> 
       <param name="llsamplerange" value="0.01"/>
       <param name="llsamplestep" value="0.01"/>
       <param name="lasamplerange" value="0.005"/>

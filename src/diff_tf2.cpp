@@ -29,7 +29,7 @@ private:
         double odom_wd ;
 
         ros::Subscriber arduino_rpm_sub ;
-	ros::Publisher odom_pub;
+	ros::Publisher odom_pub  ;
 	tf::TransformBroadcaster odom_broadcaster;
 
 	double rate;
@@ -61,8 +61,10 @@ Odometry_calc::Odometry_calc()
         // Subscribe
         arduino_rpm_sub = n.subscribe("/arduino_vel",50,&Odometry_calc::arduino_rpm_callback, this);
 
-        // Publish
-  	odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);   
+        // Publish odom
+  	odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50); 
+
+       
 }
 
 void Odometry_calc::init_variables()
@@ -203,7 +205,10 @@ void Odometry_calc::update()
 		odom.twist.twist.linear.y = 0;
 		odom.twist.twist.angular.z = arduino_wd;
 
+                
                 odom_pub.publish(odom);
+
+
                 then = now;
                 ros::spinOnce();
           }
