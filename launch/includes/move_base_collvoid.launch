@@ -19,7 +19,7 @@
      <!-- <remap from="cmd_vel" to="mobile_base/commands/velocity"/> --> <!-- for kobuki -->
      <remap from="map" to="/map" /> 
   
-     <param name="~controlled" value="$(arg controlled)" />
+     <param name="~controlled" value="$(arg controlled)" />z
      <param name="~tf_prefix" value="$(arg robot)" />
 
      <param name="global_costmap/global_frame" value="map"/>  #### 
@@ -49,7 +49,7 @@
   </node>
 
   <rosparam command="load" file="$(find collvoid_stage)/params/me_publisher_turtle.yaml"/> ####
-  <rosparam command="load" file="$(find collvoid_stage)/params/collvoid_common.yaml" ns="collvoid" /> ####
+  <!-- <rosparam command="load" file="$(find collvoid_stage)/params/collvoid_common.yaml" ns="collvoid" /> #### -->
   <param name="collvoid/base_frame" value="$(arg robot)/base_link" /> ####
 
   <node pkg="collvoid_local_planner" type="MePublisher" name="me_publisher"  /> ####
