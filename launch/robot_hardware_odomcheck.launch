@@ -20,13 +20,13 @@
         <param name="~baudrate" value="115200" /> 
      </node>
 
-     <param name="kp_v"    value = "0.5" />
+     <!-- <param name="kp_v"    value = "0.5" />
      <param name="ki_v"    value = "0" />
      <param name="kd_v"    value = "1" />
      <param name="kp_w"    value = "0.5" />
      <param name="ki_w"    value = "0" />
      <param name="kd_w"    value = "1" />
-     <node pkg = "robot_hardware" name = "outerloop" type = "outerloop" output = "screen" /> 
+     <node pkg = "robot_hardware" name = "outerloop" type = "outerloop" output = "screen" /> -->
 
        
         

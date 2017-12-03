@@ -10,7 +10,7 @@
        
     <include file="$(find rplidar_ros)/launch/rplidar.launch" />
 
-    <node pkg = "robot_hardware" name = "diff_tf2" type = "diff_tf2" output = "screen" />
+    <node pkg = "robot_hardware" name = "diff_tf_joystick" type = "diff_tf_joystick" output = "screen" />
 
     <node name="rosserial_lipo" pkg="rosserial_python" type="serial_node.py" output="screen">
         <param name="~port" value="/dev/ttyACM0" />
@@ -31,10 +31,14 @@
       <arg name="initial_pose_a" value="0.0" />
     </include>
 
+     <node name="joy_node" pkg="joy" type="joy_node" output="screen" clear_params="true">
+	<param name="dev" type="str" value="/dev/input/js0"/>
+    </node>
+
     <!-- <remap from="scan" to="base_scan"/> -->
 
-    <node pkg="collvoid_controller" type="collvoid_visualizer.py" name="controller_viz" output="screen"/> 
-    <node pkg="collvoid_controller" type="controller.py" name="controller" output="screen"/> 
+    <!-- <node pkg="collvoid_controller" type="collvoid_visualizer.py" name="controller_viz" output="screen"/> 
+    <node pkg="collvoid_controller" type="controller.py" name="controller" output="screen"/> -->
 
     <!-- <rosparam command="load" file="$(find collvoid_stage)/params/stage_params.yaml"/> -->
     <!-- <rosparam command="load" file="$(find collvoid_stage)/params_created.yaml"/> -->
@@ -45,13 +49,13 @@
       <arg name="controlled" value="true"/>
     </include> -->
 
-    <include file="$(find robot_hardware)/launch/includes/move_base_dwa.launch" >
+    <!-- <include file="$(find robot_hardware)/launch/includes/move_base_dwa.launch" >
       <arg name="robot" value=""/>
       <arg name="type" value="turtle"/>
       <arg name="controlled" value="true"/>
     </include>
 
-    <node pkg="collvoid_controller" type="controller_robots.py" name="controller_robots" /> 
+    <node pkg="collvoid_controller" type="controller_robots.py" name="controller_robots" /> -->
 
 
 

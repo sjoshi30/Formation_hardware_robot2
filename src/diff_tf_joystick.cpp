@@ -19,7 +19,7 @@ private:
 
         double arduino_wL ;
         double arduino_wR ;
-        double arduino_dt ;
+        double arduino_theta ;
         ros::Time arduino_timestamp ;
         double arduino_vd ;
         double arduino_wd ;
@@ -68,7 +68,7 @@ Odometry_calc::Odometry_calc()
         arduino_rpm_sub = n.subscribe("/arduino_vel",50,&Odometry_calc::arduino_rpm_callback, this);
 
         // Subcribe to joystick topic
-        joy_sub = n.subscribe("joy",10,&Odometry_calc::joystick_callback,this) ;
+        joy_sub = n.subscribe("joy",50,&Odometry_calc::joystick_callback,this) ;
         //joy_sub_ = nh_.subscribe<sensor_msgs::Joy>("joy", 10, &TeleopTurtle::joyCallback, this);
  
         // Publish
@@ -81,14 +81,14 @@ Odometry_calc::Odometry_calc()
 void Odometry_calc::init_variables()
 {
         Radius     = 0.045 ;
-        Length     = 0.48  ;
+        Length     = 0.53  ;
         arduino_wL = 0 ;
         arduino_wR = 0 ;
-        arduino_dt = 0 ;
+        arduino_theta = 0 ;
         arduino_vd = 0 ;
         arduino_wd = 0 ;
 
-	rate = 20;
+	rate = 50;
 
 	t_delta = ros::Duration(1.0 / rate);
 	t_next = ros::Time::now() + t_delta;
@@ -146,10 +146,10 @@ void Odometry_calc::update()
                 y_final = y_final + (sin(theta_final)*dx + cos(theta_final)*dy) ;
                 theta_final = theta_final + dtheta ;
 
-                if (theta_final >= 2*3.14)
-                   theta_final = theta_final - 2*3.14 ;
-                if (theta_final <= -2*3.14)
-                   theta_final = theta_final + 2*3.14 ;
+                if (theta_final >= 2*3.14159)
+                   theta_final = theta_final - 2*3.14159 ;
+                if (theta_final <= -2*3.14159)
+                   theta_final = theta_final + 2*3.14159 ;
 
                 //x_final = x_final + cos(theta_final)*vd*elapsed ;
                 //y_final = y_final + sin(theta_final)*vd*elapsed ;
@@ -219,7 +219,7 @@ void Odometry_calc::update()
 
                 geometry_msgs::Twist cmd_data ;
                 cmd_data.linear.x = joystick_vd ; // "-ve" to make control signal positive
-                cmd_data.linear.y = 0 ;
+                cmd_data.linear.y = theta_final*180/3.14159 ;
                 cmd_data.linear.z = 0 ;
                 cmd_data.angular.x = 0   ;      
                 cmd_data.angular.y = 0   ;     
@@ -236,7 +236,7 @@ void Odometry_calc::arduino_rpm_callback(const geometry_msgs::Vector3Stamped& rp
 {
    arduino_wL = rpm.vector.x ;
    arduino_wR = rpm.vector.y ;
-   arduino_dt = rpm.vector.z ;
+   arduino_theta = rpm.vector.z ;
    arduino_timestamp = rpm.header.stamp ;
 }
 

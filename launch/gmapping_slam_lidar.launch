@@ -52,7 +52,7 @@
       <param name="angularUpdate" value="0.01"/> <!-- 0.262 -->
       <param name="temporalUpdate" value="-1"/> <!-- 0.1 (kobuki) -->
       <param name="resampleThreshold" value="0.5"/> <!-- 0.5 -->
-      <param name="particles" value="30"/>
+      <param name="particles" value="50"/>
       <param name="xmin" value="-50.0"/> <!-- -50 -->
       <param name="ymin" value="-50.0"/> <!-- -50 -->
       <param name="xmax" value="50.0"/>  <!-- 50 -->

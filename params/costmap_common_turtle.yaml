@@ -3,7 +3,7 @@ map_type: costmap
 transform_tolerance: 0.3
 
 #footprint: [[-0.325, -0.325], [-0.325, 0.325], [0.325, 0.325], [0.46, 0.0], [0.325, -0.325]]
-robot_radius: 0.22
+robot_radius: 0.35
 
 footprint_padding: 0.0
 

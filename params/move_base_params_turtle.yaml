@@ -1,7 +1,7 @@
 DWAPlannerROS:
   # Robot Configuration Parameters - Kobuki
-  max_vel_x:  0.1  # 0.55
-  min_vel_x: -0.1
+  max_vel_x:  0.35  # 0.55
+  min_vel_x: -0.35
   
   max_vel_y: 0.0  # diff drive robot
   min_vel_y: 0.0  # diff drive robot
@@ -16,7 +16,7 @@ DWAPlannerROS:
 
   max_rot_vel: 0.25  # choose slightly less than the base's capability
   min_rot_vel: -0.25  # this is the min angular velocity when there is negligible translational velocity
-  rot_stopped_vel: 0.1
+  rot_stopped_vel: 0.05
 
   acc_lim_theta: 0.2
   acc_lim_x: 1 # maximum is theoretically 2.0, but we
@@ -35,8 +35,8 @@ DWAPlannerROS:
   prune_plan: true
 
   # Trajectory Scoring Parameters
-  path_distance_bias: 24.0      # 32.0   - weighting for how much it should stick to the global path plan
-  goal_distance_bias: 32.0      # 24.0   - wighting for how much it should attempt to reach its goal
+  path_distance_bias: 32.0      # 32.0   - weighting for how much it should stick to the global path plan
+  goal_distance_bias: 24.0      # 24.0   - wighting for how much it should attempt to reach its goal
   collvoid_scale: 48.0
   occdist_scale: 0.05           # 0.01   - weighting for how much the controller should avoid obstacles
   forward_point_distance: 0.1 # 0.325  - how far along to place an additional scoring point
@@ -57,14 +57,14 @@ DWAPlannerROS:
 
 CollvoidLocalPlanner:
  # Robot Configuration Parameters - Kobuki
-  max_vel_x: 0.1  # 0.55
-  min_vel_x: -0.1
+  max_vel_x: 0.2  # 0.55
+  min_vel_x: -0.2
 
   max_vel_y: 0.0  # diff drive robot
   min_vel_y: 0.0  # diff drive robot
 
-  max_trans_vel: 0.1 # choose slightly less than the base's capability
-  min_trans_vel: 0.05  # this is the min trans velocity when there is negligible rotational velocity
+  max_trans_vel: 0.2 # choose slightly less than the base's capability
+  min_trans_vel: -0.2  # this is the min trans velocity when there is negligible rotational velocity
   trans_stopped_vel: 0.05
 
   max_rot_vel: 0.25  # choose slightly less than the base's capability
@@ -76,12 +76,12 @@ CollvoidLocalPlanner:
   acc_lim_y: 0.0      # diff drive robot
 
   # Forward Simulation Parameters
-  sim_time: 3.0       # 1.7 1.2 
+  sim_time: 1.2       # 1.7 1.2 
   sim_granularity: 0.04
   angular_sim_granularity: 0.2
 
   # Trajectory Scoring Parameters
-  path_distance_bias: 5.0      # 32.0   - weighting for how much it should stick to the global path plan
+  path_distance_bias: 32.0      # 32.0   - weighting for how much it should stick to the global path plan
   goal_distance_bias: 24.0      # 24.0   - wighting for how much it should attempt to reach its goal
 
   occdist_scale: 0.05           # 0.01   - weighting for how much the controller should avoid obstacles
@@ -95,8 +95,8 @@ CollvoidLocalPlanner:
   xy_goal_tolerance: 0.15  # 0.10
 
   holo_robot: false
-  wheel_base: 0.25
-  robot_radius: 0.20
+  wheel_base: 0.045
+  robot_radius: 0.65
 
 max_planning_retries: 5
 controller_frequency: 5
@@ -128,12 +128,12 @@ really_aggressive_reset:
 local_costmap:
   global_frame: map
   robot_base_frame: base_link # changed from base_footprint to base_link for robot_hardware
-  update_frequency: 1.0 #3.0
-  publish_frequency: 5.0 #2.0
+  update_frequency: 10.0 #3.0
+  publish_frequency: 10.0 #2.0
   static_map: false
   rolling_window: true
-  width: 2.0
-  height: 2.0
+  width: 3.0
+  height: 3.0
   resolution: 0.02
   plugins:
   - {name: obstacle_layer,      type: "costmap_2d::VoxelLayer"}
@@ -161,7 +161,7 @@ global_costmap:
   #cost_scaling_factor and inflation_radius were now moved to the inflation_layer ns
   inflation_layer:
     enabled:              true
-    cost_scaling_factor:  10.0  # exponential rate at which the obstacle cost drops off (default 10)
-    inflation_radius:     0.26  # was 0.26 in previoys configuration
+    cost_scaling_factor:  1000.0  # exponential rate at which the obstacle cost drops off (default 10)
+    inflation_radius:     0.25  # was 0.26 in previoys configuration
 
 

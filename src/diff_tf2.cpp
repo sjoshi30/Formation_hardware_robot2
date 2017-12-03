@@ -19,7 +19,7 @@ private:
 
         double arduino_wL ;
         double arduino_wR ;
-        double arduino_dt ;
+        double arduino_theta ;
         ros::Time arduino_timestamp ;
         double arduino_vd ;
         double arduino_wd ;
@@ -70,10 +70,10 @@ Odometry_calc::Odometry_calc()
 void Odometry_calc::init_variables()
 {
         Radius     = 0.045 ;
-        Length     = 0.48  ;
+        Length     = 0.53  ;
         arduino_wL = 0 ;
         arduino_wR = 0 ;
-        arduino_dt = 0 ;
+        arduino_theta = 0 ;
         arduino_vd = 0 ;
         arduino_wd = 0 ;
 
@@ -218,7 +218,7 @@ void Odometry_calc::arduino_rpm_callback(const geometry_msgs::Vector3Stamped& rp
 {
    arduino_wL = rpm.vector.x ;
    arduino_wR = rpm.vector.y ;
-   arduino_dt = rpm.vector.z ;
+   arduino_theta = rpm.vector.z ;
    arduino_timestamp = rpm.header.stamp ;
 }
 
