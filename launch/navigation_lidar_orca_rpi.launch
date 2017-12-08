@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+    
+     # ls -l /dev |grep ttyACM
+     # sudo chmod 666 /dev/ttyACM0
+     # rosrun rosserial_python serial_node.py /dev/ttyACM0
+     # rosrun map_server map_saver -f map /map:=/robot1/map
+
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find robot_hardware)/robot_hardware_nav_orca.rviz">  
+    </node>
+
+</launch> 
