@@ -59,7 +59,7 @@ Odometry_calc::Odometry_calc()
 	ROS_INFO("Started odometry computing node");
 
         // Subscribe
-        arduino_rpm_sub = n.subscribe("/arduino_vel",50,&Odometry_calc::arduino_rpm_callback, this);
+        arduino_rpm_sub = n.subscribe("robot_2/arduino_vel",50,&Odometry_calc::arduino_rpm_callback, this);         // changed jan 5th 2018
 
         // Publish odom
   	odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50); 
@@ -147,8 +147,8 @@ void Odometry_calc::update()
                 //first, we'll publish the transform over tf
 		geometry_msgs::TransformStamped odom_trans;
 		odom_trans.header.stamp = now;
-		odom_trans.header.frame_id = "odom";
-		odom_trans.child_frame_id = "base_link";
+		odom_trans.header.frame_id = "robot_2/odom";               // changed jan 5th 2018
+		odom_trans.child_frame_id = "robot_2/base_link";           // changed jan 5th 2018            
                 odom_trans.transform.translation.x = x_final;
 		odom_trans.transform.translation.y = y_final;
 		odom_trans.transform.translation.z = 0.0;
@@ -158,8 +158,8 @@ void Odometry_calc::update()
                 // Publish odometry data over ROS 
                 nav_msgs::Odometry odom;
 		odom.header.stamp = now;
-		odom.header.frame_id = "odom";
-                odom.child_frame_id = "base_link";
+		odom.header.frame_id = "robot_2/odom";                       // changed jan 5th 2018
+                odom.child_frame_id = "robot_2/base_link";            // changed jan 5th 2018
                 odom.pose.pose.position.x = x_final;
 		odom.pose.pose.position.y = y_final;
 		odom.pose.pose.position.z = 0.0;

@@ -146,6 +146,8 @@ add_executable(diff_tf2 src/diff_tf2.cpp)
 #add_executable(outerloop2 src/outerloop2.cpp)
 add_executable(outerloop src/outerloop.cpp)
 add_executable(diff_tf_joystick src/diff_tf_joystick.cpp)
+add_executable(formation_control_new1 src/formation_control_new1.cpp)
+add_executable(formation_control_new3 src/formation_control_new3.cpp)
 
 
 ## Rename C++ executable without prefix
@@ -166,6 +168,8 @@ target_link_libraries(diff_tf2 ${catkin_LIBRARIES})
 #target_link_libraries(outerloop2 ${catkin_LIBRARIES})
 target_link_libraries(outerloop ${catkin_LIBRARIES})
 target_link_libraries(diff_tf_joystick ${catkin_LIBRARIES})
+target_link_libraries(formation_control_new1 ${catkin_LIBRARIES})
+target_link_libraries(formation_control_new3 ${catkin_LIBRARIES})
 
 
 #############
