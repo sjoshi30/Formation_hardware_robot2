@@ -56,7 +56,7 @@ private:
     //ros::Subscriber position_share_sub ;
     ros::Subscriber odom_leader_sub ;
     ros::Subscriber odom_robot2_sub ;
-    //void formation_callback(const collvoid_msgs::PoseTwistWithCovariance::ConstPtr& data) ;
+    void formation_callback(const collvoid_msgs::PoseTwistWithCovariance::ConstPtr& data) ;
     void odom_callback_leader(const nav_msgs::Odometry::ConstPtr& msg);
     void odom_callback_robot2(const nav_msgs::Odometry::ConstPtr& msg);
     void init_variables()  ;
@@ -132,8 +132,9 @@ formation_control::formation_control()
     init_variables();
 
     // Publish
-    cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("robot_2/cmd_vel",20);
-    debug_pub   = nh.advertise<geometry_msgs::Twist>("robot_2/debug",20);
+    cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("/robot_2/cmd_vel",20) ;
+    debug_pub   = nh.advertise<geometry_msgs::Twist>("/robot_2/debug",20) ;
+    formation_positionshare_pub = nh.advertise<collvoid_msgs::PoseTwistWithCovariance>("/formation_positionshare",20) ;
 
     // Subscribe
     //position_share_sub = nh.subscribe("position_share", 50, &formation_control::formation_callback, this);
@@ -250,7 +251,7 @@ void formation_control::odom_callback_leader(const nav_msgs::Odometry::ConstPtr&
     me_msg.twist.twist.linear.y  = data->twist.twist.linear.y  ;
     me_msg.twist.twist.angular.z = data->twist.twist.angular.z ;
     me_msg.robot_id              = "robot_0";
-    formation_positionshare_pub.publish(me_msg) ;
+    //formation_positionshare_pub.publish(me_msg) ;
 
     robot0_x = pose_msg.pose.position.x ;
     robot0_y = pose_msg.pose.position.y ;
@@ -267,6 +268,40 @@ void formation_control::odom_callback_leader(const nav_msgs::Odometry::ConstPtr&
 
 void formation_control::odom_callback_robot2(const nav_msgs::Odometry::ConstPtr& data)
 {
+
+    boost::mutex::scoped_lock(me_lock_);
+
+    collvoid_msgs::PoseTwistWithCovariance me_msg;
+    me_msg.header.stamp = ros::Time::now();
+    me_msg.header.frame_id = "map";
+
+    tf::Stamped <tf::Pose> global_pose;
+    global_pose.setIdentity();
+    global_pose.frame_id_ = "robot_2/base_link";
+    global_pose.stamp_ = me_msg.header.stamp ;
+
+    try 
+    {
+        tf_.waitForTransform("map", "robot_2/base_link", global_pose.stamp_, ros::Duration(0.2));
+        tf_.transformPose("map", global_pose, global_pose);
+    }
+    catch (tf::TransformException ex) 
+    {
+        ROS_WARN_THROTTLE(2,"%s", ex.what());
+        ROS_WARN_THROTTLE(2, "point odom transform failed");
+        //return false;
+    };
+
+    geometry_msgs::PoseStamped pose_msg;
+    tf::poseStampedTFToMsg(global_pose, pose_msg);
+
+    me_msg.pose.pose = pose_msg.pose;
+    me_msg.twist.twist.linear.x  = data->twist.twist.linear.x  ;
+    me_msg.twist.twist.linear.y  = data->twist.twist.linear.y  ;
+    me_msg.twist.twist.angular.z = data->twist.twist.angular.z ;
+    me_msg.robot_id              = "robot_2";
+    //formation_positionshare_pub.publish(me_msg) ;    
+
     robot2_x = data->pose.pose.position.x ;
     robot2_y = data->pose.pose.position.y ;
     tf::Quaternion q_robot2(data->pose.pose.orientation.x, data->pose.pose.orientation.y, data->pose.pose.orientation.z, data->pose.pose.orientation.w);
