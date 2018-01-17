@@ -16,9 +16,11 @@
 #include "collvoid_msgs/PoseTwistWithCovariance.h"
 
 #include "nav_msgs/OccupancyGrid.h"
+#include "nav_msgs/Odometry.h"
 #include "nav_msgs/MapMetaData.h"
 #include "std_msgs/Header.h"
 #include "nav_msgs/MapMetaData.h"
+#include <sensor_msgs/Joy.h>
 
 using namespace std ;
 
@@ -42,9 +44,14 @@ public:
 private: 
 	ros::NodeHandle nh ;
     ros::Publisher cmd_vel_pub ;
+    ros::Publisher cmd_vel_leader_pub ;
     ros::Publisher debug_pub ;
-    ros::Subscriber position_share_sub ;
-	void formation_callback(const collvoid_msgs::PoseTwistWithCovariance::ConstPtr& data) ;
+    //ros::Subscriber position_share_sub ;
+    ros::Subscriber odom_leader_sub ;
+    ros::Subscriber odom_robot2_sub ;
+	//void formation_callback(const collvoid_msgs::PoseTwistWithCovariance::ConstPtr& data) ;
+    void odom_callback_leader(const nav_msgs::Odometry::ConstPtr& msg);
+    void odom_callback_robot2(const nav_msgs::Odometry::ConstPtr& msg);
 	void init_variables()  ;
 	void update()          ; 
 
@@ -118,7 +125,9 @@ formation_control::formation_control()
     debug_pub   = nh.advertise<geometry_msgs::Twist>("debug",20);
 
     // Subscribe
-    position_share_sub = nh.subscribe("position_share", 50, &formation_control::formation_callback, this);
+    // position_share_sub = nh.subscribe("position_share", 50, &formation_control::formation_callback, this);
+    odom_leader_sub = nh.subscribe("/robot_0/odom", 50, &formation_control::odom_callback_leader, this);
+    odom_robot2_sub = nh.subscribe("/robot_2/odom", 50, &formation_control::odom_callback_robot2, this);
 }
 
 void formation_control::init_variables()
@@ -192,6 +201,35 @@ int formation_control::signum(double val)
     return 0;
 }
 
+void formation_control::odom_callback_leader(const nav_msgs::Odometry::ConstPtr& data)
+{
+    robot0_x = data->pose.pose.position.x ;
+    robot0_y = data->pose.pose.position.y ;
+    tf::Quaternion q_robot0(data->pose.pose.orientation.x, data->pose.pose.orientation.y, data->pose.pose.orientation.z, data->pose.pose.orientation.w);
+    tf::Matrix3x3 m_robot0(q_robot0);
+    double roll, pitch, yaw ;
+    m_robot0.getRPY(roll, pitch, yaw);
+    robot0_yaw = yaw ;
+    robot0_vx = data->twist.twist.linear.x ; 
+    robot0_xdot = robot0_vx*cos(robot0_yaw);
+    robot0_ydot = robot0_vx*sin(robot0_yaw);
+}
+
+void formation_control::odom_callback_robot2(const nav_msgs::Odometry::ConstPtr& data)
+{
+    robot2_x = data->pose.pose.position.x ;
+    robot2_y = data->pose.pose.position.y ;
+    tf::Quaternion q_robot2(data->pose.pose.orientation.x, data->pose.pose.orientation.y, data->pose.pose.orientation.z, data->pose.pose.orientation.w);
+    tf::Matrix3x3 m_robot2(q_robot2);
+    double roll, pitch, yaw ;
+    m_robot2.getRPY(roll, pitch, yaw);
+    robot2_yaw = yaw ;
+    robot2_vx = data->twist.twist.linear.x ; 
+    robot2_xdot = robot2_vx*cos(robot2_yaw);
+    robot2_ydot = robot2_vx*sin(robot2_yaw);
+}
+
+/*
 void formation_control::formation_callback(const collvoid_msgs::PoseTwistWithCovariance::ConstPtr& data)
 {
 	if (data->robot_id == "robot_0")
@@ -224,6 +262,7 @@ void formation_control::formation_callback(const collvoid_msgs::PoseTwistWithCov
         robot2_ydot = robot2_vx*sin(robot2_yaw) ;
 	}
 }
+*/
 
 void formation_control::update()
 {

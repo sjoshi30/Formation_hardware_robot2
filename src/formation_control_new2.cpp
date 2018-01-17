@@ -13,7 +13,7 @@
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 #include <string>
-#include "collvoid_msgs/PoseTwistWithCovariance.h"
+//#include "collvoid_msgs/PoseTwistWithCovariance.h"
 
 #include "nav_msgs/OccupancyGrid.h"
 #include "nav_msgs/MapMetaData.h"

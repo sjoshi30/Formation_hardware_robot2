@@ -22,10 +22,6 @@
 #include "nav_msgs/MapMetaData.h"
 #include <sensor_msgs/Joy.h>
 
-#include <fstream>
-#include <sstream>
-#include <iostream>
-
 using namespace std ;
 
 /*
@@ -46,33 +42,24 @@ public:
 	void spin()            ;
 	int signum(double val) ;
 private: 
-
-    ros::NodeHandle nh ;
-
+	ros::NodeHandle nh ;
     ros::Publisher cmd_vel_pub ;
     ros::Publisher debug_pub ;
-    ros::Publisher formation_positionshare_pub ;
-
-    //ros::Subscriber position_share_sub ;
+    ros::Subscriber position_share_sub ;
     ros::Subscriber odom_leader_sub ;
     ros::Subscriber odom_robot2_sub ;
-    //void formation_callback(const collvoid_msgs::PoseTwistWithCovariance::ConstPtr& data) ;
-    void odom_callback_leader(const nav_msgs::Odometry::ConstPtr& msg);
-    void odom_callback_robot2(const nav_msgs::Odometry::ConstPtr& msg);
-    void init_variables()  ;
-    void update()          ; 
-    void write_data(std::string filname) ;
+	void formation_callback(const collvoid_msgs::PoseTwistWithCovariance::ConstPtr& data) ;
+	void init_variables()  ;
+	void update()          ; 
 
-    geometry_msgs::Twist debug_msg      ;
-    geometry_msgs::Twist vel_msg        ;
+	geometry_msgs::Twist debug_msg      ;
+	geometry_msgs::Twist vel_msg        ; 
 
-    tf::TransformListener tf_ ; 
+	double SWARM_DIST ;
+	double SWARM_ANG ;
+	double FORMATION_ANG ;
 
-    double SWARM_DIST ;
-    double SWARM_ANG ;
-    double FORMATION_ANG ;
-
-    double robot0_x ;
+	double robot0_x ;
     double robot0_y ;
     double robot0_xdot  ;
     double robot0_ydot  ;
@@ -82,7 +69,6 @@ private:
     double robot0_ydotdot ;
     double robot0_yaw ;
     double robot0_vx  ;
-    double robot0_wx ;
     double robot0_omega ;
 
     double robot2_x ;
@@ -129,28 +115,25 @@ private:
 
 formation_control::formation_control()
 {
-    init_variables();
+	init_variables();
 
     // Publish
     cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("robot_2/cmd_vel",20);
     debug_pub   = nh.advertise<geometry_msgs::Twist>("robot_2/debug",20);
 
     // Subscribe
-    //position_share_sub = nh.subscribe("position_share", 50, &formation_control::formation_callback, this);
-    odom_leader_sub = nh.subscribe("/robot_0/odom", 50, &formation_control::odom_callback_leader, this);
-    odom_robot2_sub = nh.subscribe("/robot_2/odom", 50, &formation_control::odom_callback_robot2, this);
+    position_share_sub = nh.subscribe("position_share", 50, &formation_control::formation_callback, this);
 }
 
 void formation_control::init_variables()
 {
+	rate = 20 ;
 
-    rate = 20 ;
+	SWARM_DIST = 1 ;
+	SWARM_ANG = 0.785 ;
+	FORMATION_ANG = 0 ;
 
-    SWARM_DIST = 1 ;
-    SWARM_ANG = 0.785 ;
-    FORMATION_ANG = 0 ;
-
-    robot0_x = 0 ;
+	robot0_x = 0 ;
     robot0_y = 0 ;
     robot0_xdot = 0 ;
     robot0_ydot = 0 ;
@@ -160,7 +143,6 @@ void formation_control::init_variables()
     robot0_ydotdot = 0;
     robot0_yaw = 0;
     robot0_vx  = 0.05;
-    robot0_wx  = 0 ;
     robot0_omega = 0 ; // angular velocity curvature
 
     robot2_x = 0 ;
@@ -216,70 +198,6 @@ int formation_control::signum(double val)
     return 0;
 }
 
-void formation_control::odom_callback_leader(const nav_msgs::Odometry::ConstPtr& data)
-{
-
-    boost::mutex::scoped_lock(me_lock_);
-
-    collvoid_msgs::PoseTwistWithCovariance me_msg;
-    me_msg.header.stamp = ros::Time::now();
-    me_msg.header.frame_id = "map";
-
-    tf::Stamped <tf::Pose> global_pose;
-    global_pose.setIdentity();
-    global_pose.frame_id_ = "robot_0/base_link";
-    global_pose.stamp_ = me_msg.header.stamp ;
-
-    try 
-    {
-        tf_.waitForTransform("map", "robot_0/base_link", global_pose.stamp_, ros::Duration(0.2));
-        tf_.transformPose("map", global_pose, global_pose);
-    }
-    catch (tf::TransformException ex) 
-    {
-        ROS_WARN_THROTTLE(2,"%s", ex.what());
-        ROS_WARN_THROTTLE(2, "point odom transform failed");
-        //return false;
-    };
-
-    geometry_msgs::PoseStamped pose_msg;
-    tf::poseStampedTFToMsg(global_pose, pose_msg);
-
-    me_msg.pose.pose = pose_msg.pose;
-    me_msg.twist.twist.linear.x  = data->twist.twist.linear.x  ;
-    me_msg.twist.twist.linear.y  = data->twist.twist.linear.y  ;
-    me_msg.twist.twist.angular.z = data->twist.twist.angular.z ;
-    me_msg.robot_id              = "robot_0";
-    formation_positionshare_pub.publish(me_msg) ;
-
-    robot0_x = pose_msg.pose.position.x ;
-    robot0_y = pose_msg.pose.position.y ;
-    tf::Quaternion q_robot0(pose_msg.pose.orientation.x, pose_msg.pose.orientation.y, pose_msg.pose.orientation.z, pose_msg.pose.orientation.w);
-    tf::Matrix3x3 m_robot0(q_robot0);
-    double roll, pitch, yaw ;
-    m_robot0.getRPY(roll, pitch, yaw);
-    robot0_yaw = yaw ;
-    robot0_vx = data->twist.twist.linear.x ;
-    robot0_wx = data->twist.twist.angular.z ; 
-    robot0_xdot = robot0_vx*cos(robot0_yaw);
-    robot0_ydot = robot0_vx*sin(robot0_yaw);
-}
-
-void formation_control::odom_callback_robot2(const nav_msgs::Odometry::ConstPtr& data)
-{
-    robot2_x = data->pose.pose.position.x ;
-    robot2_y = data->pose.pose.position.y ;
-    tf::Quaternion q_robot2(data->pose.pose.orientation.x, data->pose.pose.orientation.y, data->pose.pose.orientation.z, data->pose.pose.orientation.w);
-    tf::Matrix3x3 m_robot2(q_robot2);
-    double roll, pitch, yaw ;
-    m_robot2.getRPY(roll, pitch, yaw);
-    robot2_yaw = yaw ;
-    robot2_vx = data->twist.twist.linear.x ; 
-    robot2_xdot = robot2_vx*cos(robot2_yaw);
-    robot2_ydot = robot2_vx*sin(robot2_yaw);
-}
-
-/*
 void formation_control::formation_callback(const collvoid_msgs::PoseTwistWithCovariance::ConstPtr& data)
 {
 	if (data->robot_id == "robot_0")
@@ -312,7 +230,7 @@ void formation_control::formation_callback(const collvoid_msgs::PoseTwistWithCov
         robot2_ydot = robot2_vx*sin(robot2_yaw) ;
 	}
 }
-*/
+
 void formation_control::update()
 {
 	ros::Time now = ros::Time::now();
@@ -324,15 +242,15 @@ void formation_control::update()
 		//ROS_INFO_STREAM("now =" << now.toSec());
 		//ROS_INFO_STREAM("then =" << then.toSec());
 
-		FORMATION_ANG = 1.57 - SWARM_ANG - robot0_yaw ;
+		FORMATION_ANG = SWARM_ANG - robot0_yaw ;
 
 		if (FORMATION_ANG >= 2*M_PI)
 			FORMATION_ANG = FORMATION_ANG - 2*M_PI ;
 		if (FORMATION_ANG <= 2*M_PI)
 			FORMATION_ANG = FORMATION_ANG + 2*M_PI ;
 
-	goal_x = robot0_x - SWARM_DIST*cos(FORMATION_ANG) ;
-        goal_y = robot0_y - SWARM_DIST*sin(FORMATION_ANG) ;
+	    goal_x = robot0_x + SWARM_DIST*cos(FORMATION_ANG) ;
+        goal_y = robot0_y + SWARM_DIST*sin(FORMATION_ANG) ;
 
         robot0_xdotdot = (robot0_xdot - robot0_xdot_prev)/elapsed ;
         robot0_ydotdot = (robot0_ydot - robot0_ydot_prev)/elapsed ;
@@ -369,8 +287,7 @@ void formation_control::update()
             debug_pub.publish(debug_msg)                          ;
         }
         else 
-        {    
-            /*
+        {
         	delta_l = sqrt(pow(goal_y-robot2_y,2) + pow(goal_x-robot2_x,2))   ;
         	theta = atan2(goal_y-robot2_y,goal_x-robot2_x)                    ;
         	e_theta = theta - robot2_yaw ;
@@ -385,9 +302,6 @@ void formation_control::update()
         	{
         		vel_msg.angular.z = k_orientation*e_orientation ;
         	}
-            */
-            vel_msg.linear.x = 0 ;
-            vel_msg.angular.z = 0 ;
             cmd_vel_pub.publish(vel_msg) ;
         }
         
@@ -409,19 +323,9 @@ void formation_control::spin()
     while (ros::ok())
 	{
 	   update();
-           write_data("/home/kmondal/catkin_ws/src/robot_hardware/data/robot2_data.txt") ;           
 	   loop_rate.sleep();
 	}
-}
-
-void formation_control::write_data(std::string filename)
-{
-    std::ofstream dataFile ;
-    dataFile.open(filename.c_str(),std::ios::app);
-    dataFile << robot2_x << " " << robot2_y << " " << robot2_yaw << " " << robot2_vx << " " << robot2_wx << "\n" ;
-    dataFile.close() ;
-}
-      
+}  
   
 
 int main(int argc, char **argv)
