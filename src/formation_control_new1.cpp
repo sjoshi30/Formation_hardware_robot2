@@ -395,13 +395,13 @@ void formation_control::update()
             vel_msg.angular.z = robot0_omega - vt2      ; 
             cmd_vel_pub.publish(vel_msg) ;
             
-            debug_msg.linear.x =  robot0_yaw                ;
+            debug_msg.linear.x =  robot0_yaw               ;
             debug_msg.linear.y =  robot2_yaw               ;
-            debug_msg.linear.z =  robot0_omega                      ;
-            debug_msg.angular.x = robot2_y                              ;
-            debug_msg.angular.y = goal_x                             ;
-            debug_msg.angular.z = goal_y                               ;
-            debug_pub.publish(debug_msg)                          ;
+            debug_msg.linear.z =  robot0_omega             ;
+            debug_msg.angular.x = robot2_y                 ;
+            debug_msg.angular.y = goal_x                   ;
+            debug_msg.angular.z = goal_y                   ;
+            debug_pub.publish(debug_msg)                   ;
         }
         else 
         {    
