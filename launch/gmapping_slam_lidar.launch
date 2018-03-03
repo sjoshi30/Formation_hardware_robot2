@@ -16,7 +16,7 @@
      #sudo dkms install 8188eu/1.0 (to execute this in raspbery pi, you need to install the raspberry pi kernel headers first - BEWARE installation is slow)
      #sudo modprobe 8188eu
      #https://askubuntu.com/questions/912498/tl-wn722n-is-not-recognized
-     #https://www.raspberrypi.org/forums/viewtopic.php?f=46&t=178205
+     #https://www.raspberrypi.org/forums/viewtopic.php?f=46t=178205
      #https://www.raspberrypi.org/forums/viewtopic.php?t=154749
 
      # ROS networking
@@ -87,15 +87,8 @@
     <!--<remap from="cmd_vel" to="mobile_base/commands/velocity"/> for kobuki --> 
     <!--param name="base_local_planner" value="eband_local_planner/EBandPlannerROS" /-->
 
-    
-
-
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find robot_hardware)/robot_hardware_slam_1.rviz">
       <!-- <remap from="move_base_simple/goal" to="robot1/move_base_simple/goal"/> --> 
     </node> 
-
-
-
-    
 
 </launch> 
