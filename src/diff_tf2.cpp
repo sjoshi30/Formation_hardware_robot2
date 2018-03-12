@@ -19,8 +19,10 @@ private:
 
         double arduino_wL ;
         double arduino_wR ;
-        double arduino_theta ;
-        double encoder_theta ; 
+        double IMU_theta ;
+        double IMU_theta_prev ;
+        double arduino_IMUomega ;
+        double encoder_theta ;
         ros::Time arduino_timestamp ;
         double arduino_vd ;
         double arduino_wd ;
@@ -32,6 +34,12 @@ private:
         ros::Subscriber arduino_rpm_sub ;
 	    ros::Publisher odom_pub  ;
 	    tf::TransformBroadcaster odom_broadcaster;
+
+        ros::Publisher debug_pub ;
+        geometry_msgs::Twist debug_msg ;
+
+        double arduino_wd_IMU ;
+        double arduino_wd_ENC ; 
 
 	    double rate;
 	    ros::Duration t_delta;
@@ -48,7 +56,7 @@ private:
         double vd ;
         double wd ;
 
-        void arduino_rpm_callback(const geometry_msgs::Vector3Stamped& rpm);
+        void arduino_rpm_callback(const geometry_msgs::Twist& rpm);
 	    void init_variables();
 	    void update();
 };
@@ -60,10 +68,13 @@ Odometry_calc::Odometry_calc()
 	    ROS_INFO("Started odometry computing node");
 
         // Subscribe
-        arduino_rpm_sub = n.subscribe("robot_2/arduino_vel",50,&Odometry_calc::arduino_rpm_callback, this);         // changed jan 5th 2018
+        arduino_rpm_sub = n.subscribe("/robot_2/arduino_vel",50,&Odometry_calc::arduino_rpm_callback, this);         // changed jan 5th 2018
 
         // Publish odom
   	    odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);     
+
+        // Publish debug
+        debug_pub = n.advertise<geometry_msgs::Twist>("debug",50);
 }
 
 void Odometry_calc::init_variables()
@@ -72,10 +83,13 @@ void Odometry_calc::init_variables()
         Length     = 0.55  ;
         arduino_wL = 0 ;
         arduino_wR = 0 ;
-        arduino_theta = 0 ;
+        IMU_theta  = 0 ;
+        IMU_theta_prev = 0 ;
         encoder_theta = 0 ;
         arduino_vd = 0 ;
         arduino_wd = 0 ;
+        arduino_wd_IMU = 0 ;
+        arduino_wd_ENC = 0 ; 
 
 	    rate = 20;
 
@@ -117,7 +131,7 @@ void Odometry_calc::update()
         double dtheta ;
         double dxy ;
         double dx ;
-        double dy ;  
+        double dy ; 
 
 	if ( now > t_next) 
         {
@@ -125,7 +139,9 @@ void Odometry_calc::update()
 		        elapsed = now.toSec() - then.toSec(); 
 		
                 arduino_vd = Radius*(arduino_wL + arduino_wR)/2 ;
-                arduino_wd = Radius*(arduino_wL - arduino_wR)/Length ;
+                //arduino_wd = Radius*(arduino_wL - arduino_wR)/Length ;
+                //arduino_wd_IMU = arduino_IMUomega ;
+                arduino_wd = arduino_IMUomega ;
                
                 dxy    = arduino_vd * elapsed ; //arduino_dt ;
                 dtheta = arduino_wd * elapsed ; //arduino_dt ;
@@ -133,10 +149,7 @@ void Odometry_calc::update()
                 dy = -sin(dtheta) * dxy ;
                 x_final = x_final + (cos(theta_final)*dx - sin(theta_final)*dy) ;
                 y_final = y_final + (sin(theta_final)*dx + cos(theta_final)*dy) ;
-                encoder_theta = encoder_theta + dtheta ;
-                //theta_final = theta_final + dtheta ;
-
-                theta_final = (arduino_theta + encoder_theta)/2 ;
+                theta_final = theta_final + dtheta ;
 
                 if (theta_final >= 3.14)
                    theta_final = theta_final - 2*3.14 ;
@@ -208,6 +221,13 @@ void Odometry_calc::update()
 		        odom.twist.twist.linear.y = 0;
 		        odom.twist.twist.angular.z = arduino_wd;
 
+                debug_msg.linear.x = theta_final*(180/3.14159) ;
+                debug_msg.linear.y = 0;
+                debug_msg.linear.z = 0 ;
+                debug_msg.angular.x = arduino_wd_ENC ;
+                debug_msg.angular.y = arduino_wd_IMU ;
+                debug_msg.angular.z = arduino_wd ;
+                debug_pub.publish(debug_msg);
                 
                 odom_pub.publish(odom);
 
@@ -217,12 +237,12 @@ void Odometry_calc::update()
           }
 }
             
-void Odometry_calc::arduino_rpm_callback(const geometry_msgs::Vector3Stamped& rpm)
+void Odometry_calc::arduino_rpm_callback(const geometry_msgs::Twist& rpm)
 {
-   arduino_wL = rpm.vector.x ;
-   arduino_wR = rpm.vector.y ;
-   arduino_theta = rpm.vector.z*3.14/180 ;
-   arduino_timestamp = rpm.header.stamp ;
+   arduino_wL = rpm.linear.x ;
+   arduino_wR = rpm.linear.y ;
+   arduino_IMUomega = rpm.angular.z ;
+   //arduino_timestamp = rpm.header.stamp ;
 }
 
 

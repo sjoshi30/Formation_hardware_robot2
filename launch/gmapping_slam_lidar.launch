@@ -26,69 +26,66 @@
 
     <param name="/use_sim_time" value="false"/> 
        
-    <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+    <!-- <include file="$(find rplidar_ros)/launch/rplidar.launch" /> -->
 
     <node name="joy_node" pkg="joy" type="joy_node" output="screen" clear_params="true">
 	<param name="dev" type="str" value="/dev/input/js0"/>
     </node>
 
-    <node pkg = "robot_hardware" name = "diff_tf_joystick" type = "diff_tf_joystick" output = "screen" />
+    <group ns="robot_2">
 
-    <node name="rosserial_lipo" pkg="rosserial_python" type="serial_node.py" output="screen">
+       <node pkg = "robot_hardware" name = "diff_tf_joystick" type = "diff_tf_joystick" output = "screen" />
+
+       <node name="rosserial_lipo" pkg="rosserial_python" type="serial_node.py" output="screen">
         <param name="~port" value="/dev/ttyACM0" />
         <param name="~baudrate" value="115200" /> <!-- change 115200 for 50:1 motors -->
-    </node>
+       </node>
 
-    <!-- transformation between laser_link and base_link-->
-    <node name="base_link_to_laser" pkg="tf" type="static_transform_publisher" args="0.12 0 0 3.14 0 0 /base_link /laser 10" /> 
+       <!-- transformation between laser_link and base_link-->
+       <node name="base_link_to_laser" pkg="tf" type="static_transform_publisher" args="0.12 0 0 3.14 0 0 robot_2/base_link robot_2/laser 10" /> 
   
-    <!--GMapping does not publish geometry_msgs/PoseWithCovarianceStamped message as robot_pose_ekf and other packages do. Instead it provide transformation from map frame to odom frame. In combination    with transformation from odom frame to robot base frame (provided by your odometry) you have estimation of your robot pose. -->
-    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen" >
+       <!--GMapping does not publish geometry_msgs/PoseWithCovarianceStamped message as robot_pose_ekf and other packages do. Instead it provide transformation from map frame to odom frame. In combination    with transformation from odom frame to robot base frame (provided by your odometry) you have estimation of your robot pose. -->
+       <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen" >
       <!-- <remap from="scan" to="scan"/> -->
-      <param name="map_frame" value="map"/>
-      <param name="odom_frame" value="odom"/>
-      <param name="base_frame" value="base_link"/>
-      <param name="map_update_interval" value="0.05"/> <!-- 0.05 -->
-      <param name="maxUrange" value="6.0"/>
-      <param name="maxRange" value="8.0"/>
-      <param name="sigma" value="0.05"/> <!-- 0.05 --> <!-- The sigma used by the greedy endpoint matching  -->
-      <param name="kernelSize" value="1"/> <!-- 1 --> <!-- The kernel in which to look for a correspondence -->
-      <param name="lstep" value="0.05"/><!-- 0.05 --> <!-- The optimization step in translation  -->
-      <param name="astep" value="0.05"/><!-- 0.05 --> <!-- The optimization step in rotation -->
-      <param name="iterations" value="5"/> <!-- 5 --> <!-- The number of iterations of the scanmatcher  -->
-      <param name="lsigma" value="0.075"/>
-      <param name="ogain" value="3.0"/>
-      <param name="lskip" value="0"/>
-      <param name="srr" value="0.01"/>
-      <param name="srt" value="0.02"/>
-      <param name="str" value="0.01"/>
-      <param name="stt" value="0.02"/>
-      <param name="linearUpdate" value="0.01"/> <!-- 0.25 -->
-      <param name="angularUpdate" value="0.01"/> <!-- 0.262 -->
-      <param name="temporalUpdate" value="-1"/> <!-- 0.1 (kobuki) -->
-      <param name="resampleThreshold" value="0.5"/> <!-- 0.5 -->
-      <param name="particles" value="50"/>
-      <param name="xmin" value="-50.0"/> <!-- -50 -->
-      <param name="ymin" value="-50.0"/> <!-- -50 -->
-      <param name="xmax" value="50.0"/>  <!-- 50 -->
-      <param name="ymax" value="50.0"/> <!-- 50 -->
-      <param name="delta" value="0.1"/> 
-      <param name="llsamplerange" value="0.01"/>
-      <param name="llsamplestep" value="0.01"/>
-      <param name="lasamplerange" value="0.005"/>
-      <param name="lasamplestep" value="0.005"/>
-      <param name="transform_publish_period" value="0.05"/> <!-- How long (in seconds) between transform publications.  -->
-      <param name="minimumScore" value="100"/>  <!-- 0.005 (kobuki)--> <!-- Minimum score for considering the outcome of the scan matching good -->
-    </node> 
+        <param name="map_frame" value="map"/>
+        <param name="odom_frame" value="robot_2/odom"/>
+        <param name="base_frame" value="robot_2/base_link"/>
+        <param name="map_update_interval" value="0.05"/> <!-- 0.05 -->
+        <param name="maxUrange" value="6.0"/>
+        <param name="maxRange" value="8.0"/>
+        <param name="sigma" value="0.05"/> <!-- 0.05 --> <!-- The sigma used by the greedy endpoint matching  -->
+        <param name="kernelSize" value="1"/> <!-- 1 --> <!-- The kernel in which to look for a correspondence -->
+        <param name="lstep" value="0.05"/><!-- 0.05 --> <!-- The optimization step in translation  -->
+        <param name="astep" value="0.05"/><!-- 0.05 --> <!-- The optimization step in rotation -->
+        <param name="iterations" value="5"/> <!-- 5 --> <!-- The number of iterations of the scanmatcher  -->
+        <param name="lsigma" value="0.075"/>
+        <param name="ogain" value="3.0"/>
+        <param name="lskip" value="0"/>
+        <param name="srr" value="0.01"/>
+        <param name="srt" value="0.02"/>
+        <param name="str" value="0.01"/>
+        <param name="stt" value="0.02"/>
+        <param name="linearUpdate" value="0.01"/> <!-- 0.25 -->
+        <param name="angularUpdate" value="0.01"/> <!-- 0.262 -->
+        <param name="temporalUpdate" value="-1"/> <!-- 0.1 (kobuki) -->
+        <param name="resampleThreshold" value="0.5"/> <!-- 0.5 -->
+        <param name="particles" value="50"/>
+        <param name="xmin" value="-50.0"/> <!-- -50 -->
+        <param name="ymin" value="-50.0"/> <!-- -50 -->
+        <param name="xmax" value="50.0"/>  <!-- 50 -->
+        <param name="ymax" value="50.0"/> <!-- 50 -->
+        <param name="delta" value="0.1"/> 
+        <param name="llsamplerange" value="0.01"/>
+        <param name="llsamplestep" value="0.01"/>
+        <param name="lasamplerange" value="0.005"/>
+        <param name="lasamplestep" value="0.005"/>
+        <param name="transform_publish_period" value="0.05"/> <!-- How long (in seconds) between transform publications.  -->
+        <param name="minimumScore" value="100"/>  <!-- 0.005 (kobuki)--> <!-- Minimum score for considering the outcome of the scan matching good -->
+      </node> 
 
-    <!-- Run AMCL -->
-    <!-- <include file="$(find robot_hardware)/launch/includes/amcl.launch.xml" /> -->
-
-    <!--<remap from="cmd_vel" to="mobile_base/commands/velocity"/> for kobuki --> 
-    <!--param name="base_local_planner" value="eband_local_planner/EBandPlannerROS" /-->
+    </group>
 
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find robot_hardware)/robot_hardware_slam_1.rviz">
-      <!-- <remap from="move_base_simple/goal" to="robot1/move_base_simple/goal"/> --> 
     </node> 
 
 </launch> 

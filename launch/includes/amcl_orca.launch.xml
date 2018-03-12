@@ -15,7 +15,7 @@
     <param name="odom_model_type"           value="diff"/>
     <param name="transform_tolerance" value="0.2" /> <!-- Added from collvoid -->
     <param name="odom_alpha5"               value="0.1"/>
-    <param name="gui_publish_rate"          value="10.0"/>
+    <param name="gui_publish_rate"          value="5.0"/>
     <param name="laser_max_beams"             value="30"/>
     <param name="laser_max_range"           value="12.0"/>
     <param name="min_particles"             value="100"/>
@@ -47,7 +47,7 @@
     <!-- Number of filter updates required before resampling. -->
     <param name="resample_interval"         value="2"/> <!-- 2 -->
     <!-- Increase tolerance because the computer can get quite busy -->
-    <param name="transform_tolerance"       value="1.0"/>
+    <param name="transform_tolerance"       value="2.0"/>
     <!-- Exponential decay rate for the slow average weight filter, used in deciding when to recover by adding random poses. A good value might be 0.001. -->
     <param name="recovery_alpha_slow"       value="0.0"/>
     <!--Exponential decay rate for the fast average weight filter, used in deciding when to recover by adding random poses. A good value might be 0.1. -->
