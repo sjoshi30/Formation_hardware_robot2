@@ -28,11 +28,13 @@
        
     <!-- <include file="$(find rplidar_ros)/launch/rplidar.launch" /> -->
 
-    <node name="joy_node" pkg="joy" type="joy_node" output="screen" clear_params="true">
-	<param name="dev" type="str" value="/dev/input/js0"/>
-    </node>
+    
 
     <group ns="robot_2">
+
+       <node name="joy_node" pkg="joy" type="joy_node" output="screen" clear_params="true">
+	       <param name="dev" type="str" value="/dev/input/js0"/>
+       </node>
 
        <node pkg = "robot_hardware" name = "diff_tf_joystick" type = "diff_tf_joystick" output = "screen" />
 

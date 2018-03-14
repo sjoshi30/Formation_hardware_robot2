@@ -8,7 +8,7 @@
 
     <param name="/use_sim_time" value="false"/> 
 
-    <node name="map_server" pkg="map_server" type="map_server" args="$(find robot_hardware)/map_METS.yaml" > 
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find robot_hardware)/map_METS_CONF.yaml" > 
         <param name="frame_id" value="/map" />
     </node>
 
@@ -21,6 +21,10 @@
     <group ns="robot_2">
 
         <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+
+        <node name="joy_node" pkg="joy" type="joy_node" output="screen" clear_params="true">
+           <param name="dev" type="str" value="/dev/input/js0" />
+        </node>
 
         <!-- <node pkg = "robot_hardware" name = "diff_tf2" type = "diff_tf2" output = "screen" /> -->
         <node pkg = "robot_hardware" name = "diff_tf_joystick" type = "diff_tf_joystick" output = "screen" /> 
