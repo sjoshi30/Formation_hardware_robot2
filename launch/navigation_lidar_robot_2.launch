@@ -29,7 +29,7 @@
         <!-- <node pkg = "robot_hardware" name = "diff_tf2" type = "diff_tf2" output = "screen" /> -->
         <node pkg = "robot_hardware" name = "diff_tf_joystick" type = "diff_tf_joystick" output = "screen" /> 
 
-        <!-- <node pkg="robot_hardware" name="formation_control_new1" type="formation_control_new1" output="screen" args="" /> -->
+        <node pkg="robot_hardware" name="formation_control_new1" type="formation_control_new1" output="screen" args="" /> 
 
         <node name="rosserial_lipo" pkg="rosserial_python" type="serial_node.py" output="screen">
            <param name="~port" value="/dev/ttyACM0" />
@@ -38,11 +38,11 @@
 
         <node name="base_link_to_laser" pkg="tf" type="static_transform_publisher" args="0.12 0 0 0 0 0 robot_2/base_link robot_2/laser 10" />
 
-       <include file="$(find robot_hardware)/launch/includes/move_base_collvoid.launch">
+       <!-- <include file="$(find robot_hardware)/launch/includes/move_base_collvoid.launch">
           <arg name="robot" value="robot_2" />
           <arg name="type"  value="turtle"    />
           <arg name="controlled" value="true" />
-       </include> 
+       </include> --> 
 
        <include file="$(find robot_hardware)/launch/includes/amcl_orca.launch.xml"> 
          <arg name="tf_prefix" value="robot_2" /> 

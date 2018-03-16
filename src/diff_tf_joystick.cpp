@@ -75,13 +75,12 @@ Odometry_calc::Odometry_calc()
 
         // Subcribe to joystick topic
         joy_sub = n.subscribe("joy",50,&Odometry_calc::joystick_callback,this) ;
-        //joy_sub_ = nh_.subscribe<sensor_msgs::Joy>("joy", 10, &TeleopTurtle::joyCallback, this);
  
         // Publish
-  	    odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50); 
+  	odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50); 
 
         // Publish cmd_vel
-        cmd_vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 50) ; 
+        // cmd_vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 50) ; 
 
         // Publish debug message
         debug_pub = n.advertise<geometry_msgs::Twist>("debug",50);
