@@ -237,13 +237,13 @@ void Odometry_calc::update()
                 odom_pub.publish(odom);
 
                 geometry_msgs::Twist cmd_data ;
-                cmd_data.linear.x = -joystick_vd ; // "-ve" to make control signal positive
+                /*cmd_data.linear.x = -joystick_vd ; // "-ve" to make control signal positive
                 cmd_data.linear.y = 0;
                 cmd_data.linear.z = 0 ;
                 cmd_data.angular.x = 0   ;      
                 cmd_data.angular.y = 0   ;     
                 cmd_data.angular.z = -joystick_wd   ;     
-                cmd_vel_pub.publish(cmd_data); 
+                cmd_vel_pub.publish(cmd_data); */
 
                 // Debug message
                 debug_msg.linear.x = theta_final*(180/3.14);
