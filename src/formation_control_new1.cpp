@@ -391,8 +391,16 @@ void formation_control::update()
             robot0_xdot_prev = robot0_xdot      ;
             robot0_ydot_prev = robot0_ydot      ;
             
-            vel_msg.linear.x  = robot0_vx*cos(e3) - vt1 ;
-            vel_msg.angular.z = robot0_omega - vt2      ; 
+            
+            //vel_msg.linear.x  = robot0_vx*cos(e3) - vt1 ;
+            //vel_msg.angular.z = robot0_omega - vt2      ;
+            
+            // Controller 2  ( Kanayama)
+            double kx = 1 ;
+            double ky = 1 ;
+            double kth = 1 ;
+            vel_msg.linear.x = robot0_vx*cos(e3) + kx*e1 ;
+            vel_msg.angular.z = robot0_wx + robot0_vx*(ky*e2 + kth*sin(e3)) ;  
             cmd_vel_pub.publish(vel_msg) ;
             
             debug_msg.linear.x =  robot0_yaw               ;
