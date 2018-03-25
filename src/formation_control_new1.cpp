@@ -53,10 +53,10 @@ private:
     ros::Publisher debug_pub ;
     ros::Publisher formation_positionshare_pub ;
 
-    //ros::Subscriber position_share_sub ;
+    ros::Subscriber position_share_sub ;
     ros::Subscriber odom_leader_sub ;
     ros::Subscriber odom_robot2_sub ;
-    void formation_callback(const collvoid_msgs::PoseTwistWithCovariance::ConstPtr& data) ;
+    // void formation_callback(const collvoid_msgs::PoseTwistWithCovariance::ConstPtr& data) ;
     void odom_callback_leader(const nav_msgs::Odometry::ConstPtr& msg);
     void odom_callback_robot2(const nav_msgs::Odometry::ConstPtr& msg);
     void init_variables()  ;
@@ -138,8 +138,8 @@ formation_control::formation_control()
 
     // Subscribe
     //position_share_sub = nh.subscribe("position_share", 50, &formation_control::formation_callback, this);
-    odom_leader_sub = nh.subscribe("/robot_0/odom", 50, &formation_control::odom_callback_leader, this);
-    odom_robot2_sub = nh.subscribe("/robot_2/odom", 50, &formation_control::odom_callback_robot2, this);
+    odom_leader_sub = nh.subscribe("/robot_0/odom", 20, &formation_control::odom_callback_leader, this);
+    odom_robot2_sub = nh.subscribe("/robot_2/odom", 20, &formation_control::odom_callback_robot2, this);
 }
 
 void formation_control::init_variables()
@@ -233,8 +233,8 @@ void formation_control::odom_callback_leader(const nav_msgs::Odometry::ConstPtr&
 
     try 
     {
-        tf_.waitForTransform("map", "robot_0/base_link", global_pose.stamp_, ros::Duration(0.2));
-        tf_.transformPose("map", global_pose, global_pose);
+        tf_.waitForTransform("/map", "robot_0/base_link", global_pose.stamp_, ros::Duration(3));
+        tf_.transformPose("/map", global_pose, global_pose);
     }
     catch (tf::TransformException ex) 
     {
@@ -251,7 +251,7 @@ void formation_control::odom_callback_leader(const nav_msgs::Odometry::ConstPtr&
     me_msg.twist.twist.linear.y  = data->twist.twist.linear.y  ;
     me_msg.twist.twist.angular.z = data->twist.twist.angular.z ;
     me_msg.robot_id              = "robot_0";
-    //formation_positionshare_pub.publish(me_msg) ;
+    formation_positionshare_pub.publish(me_msg) ;
 
     robot0_x = pose_msg.pose.position.x ;
     robot0_y = pose_msg.pose.position.y ;
@@ -282,8 +282,8 @@ void formation_control::odom_callback_robot2(const nav_msgs::Odometry::ConstPtr&
 
     try 
     {
-        tf_.waitForTransform("map", "robot_2/base_link", global_pose.stamp_, ros::Duration(0.2));
-        tf_.transformPose("map", global_pose, global_pose);
+        tf_.waitForTransform("/map", "robot_2/base_link", global_pose.stamp_, ros::Duration(3));
+        tf_.transformPose("/map", global_pose, global_pose);
     }
     catch (tf::TransformException ex) 
     {
@@ -300,7 +300,7 @@ void formation_control::odom_callback_robot2(const nav_msgs::Odometry::ConstPtr&
     me_msg.twist.twist.linear.y  = data->twist.twist.linear.y  ;
     me_msg.twist.twist.angular.z = data->twist.twist.angular.z ;
     me_msg.robot_id              = "robot_2";
-    //formation_positionshare_pub.publish(me_msg) ;    
+    formation_positionshare_pub.publish(me_msg) ;    
 
     robot2_x = data->pose.pose.position.x ;
     robot2_y = data->pose.pose.position.y ;
@@ -314,8 +314,8 @@ void formation_control::odom_callback_robot2(const nav_msgs::Odometry::ConstPtr&
     robot2_ydot = robot2_vx*sin(robot2_yaw);
 }
 
-/*
-void formation_control::formation_callback(const collvoid_msgs::PoseTwistWithCovariance::ConstPtr& data)
+
+/*void formation_control::formation_callback(const collvoid_msgs::PoseTwistWithCovariance::ConstPtr& data)
 {
 	if (data->robot_id == "robot_0")
 	{
@@ -327,7 +327,7 @@ void formation_control::formation_callback(const collvoid_msgs::PoseTwistWithCov
         m_robot0.getRPY(roll, pitch, yaw);
         robot0_yaw = yaw ;
         robot0_vx = data->twist.twist.linear.x ;
-        //robot0_wx = data->twist.twist.angular.z ;
+        robot0_wx = data->twist.twist.angular.z ;
         robot0_xdot = robot0_vx*cos(robot0_yaw) ;
         robot0_ydot = robot0_vx*sin(robot0_yaw) ;
 	}
@@ -342,12 +342,13 @@ void formation_control::formation_callback(const collvoid_msgs::PoseTwistWithCov
         m_robot2.getRPY(roll, pitch, yaw);
         robot2_yaw = yaw ;
         robot2_vx = data->twist.twist.linear.x ;
-        //robot1_wx = data->twist.twist.angular.z ;
+        robot2_wx = data->twist.twist.angular.z ;
         robot2_xdot = robot2_vx*cos(robot2_yaw) ;
         robot2_ydot = robot2_vx*sin(robot2_yaw) ;
 	}
 }
 */
+
 void formation_control::update()
 {
 	ros::Time now = ros::Time::now();
@@ -361,9 +362,9 @@ void formation_control::update()
 
 		FORMATION_ANG = 1.57 - SWARM_ANG - robot0_yaw ;
 
-		if (FORMATION_ANG >= 2*M_PI)
+		if (FORMATION_ANG >= M_PI)
 			FORMATION_ANG = FORMATION_ANG - 2*M_PI ;
-		if (FORMATION_ANG <= 2*M_PI)
+		if (FORMATION_ANG <= M_PI)
 			FORMATION_ANG = FORMATION_ANG + 2*M_PI ;
 
 	goal_x = robot0_x - SWARM_DIST*cos(FORMATION_ANG) ;
@@ -372,71 +373,54 @@ void formation_control::update()
         robot0_xdotdot = (robot0_xdot - robot0_xdot_prev)/elapsed ;
         robot0_ydotdot = (robot0_ydot - robot0_ydot_prev)/elapsed ;
 
-        if (abs(robot0_vx) >= 0.05) 
-        {
-        	robot0_omega   = (robot0_xdot*robot0_ydotdot - robot0_xdotdot*robot0_ydot)/pow(robot0_vx,2) ;
+        /*robot0_omega   = (robot0_xdot*robot0_ydotdot - robot0_xdotdot*robot0_ydot)/pow(robot0_vx,2) ;
 
             omega_n           =  sqrt(pow(robot0_omega,2) + g*pow(robot0_vx,2)) ;
             k1                =  k1_gain*omega_n ;
             k2                =  k2_gain*omega_n ;
-            k3                =  g*abs(robot0_vx);
+            k3                =  g*abs(robot0_vx); */
 
             e1                =  cos(robot2_yaw)*(goal_x-robot2_x) + sin(robot2_yaw)*(goal_y-robot2_y) ; // ok
             e2                = -sin(robot2_yaw)*(goal_x-robot2_x) + cos(robot2_yaw)*(goal_y-robot2_y) ; // ok
             e3                =  robot0_yaw - robot2_yaw ; //very small
 
-            vt1               = -k1*e1 ;
-            vt2               = -k2*signum(robot0_vx)*e2 - k3*e3 ;
+        if (abs(robot0_vx) >= 0.05) 
+        {
+            
 
-            robot0_xdot_prev = robot0_xdot      ;
-            robot0_ydot_prev = robot0_ydot      ;
-            
-            
+            //vt1               = -k1*e1 ;
+            //vt2               = -k2*signum(robot0_vx)*e2 - k3*e3 ;
             //vel_msg.linear.x  = robot0_vx*cos(e3) - vt1 ;
             //vel_msg.angular.z = robot0_omega - vt2      ;
-            
+
+            //robot0_xdot_prev = robot0_xdot      ;
+            //robot0_ydot_prev = robot0_ydot      ;
+                          
             // Controller 2  ( Kanayama)
             double kx = 1 ;
             double ky = 1 ;
             double kth = 1 ;
             vel_msg.linear.x = robot0_vx*cos(e3) + kx*e1 ;
-            vel_msg.angular.z = robot0_wx + robot0_vx*(ky*e2 + kth*sin(e3)) ;  
-            cmd_vel_pub.publish(vel_msg) ;
-            
-            debug_msg.linear.x =  robot0_yaw               ;
-            debug_msg.linear.y =  robot2_yaw               ;
-            debug_msg.linear.z =  robot0_omega             ;
-            debug_msg.angular.x = robot2_y                 ;
-            debug_msg.angular.y = goal_x                   ;
-            debug_msg.angular.z = goal_y                   ;
-            debug_pub.publish(debug_msg)                   ;
+            vel_msg.angular.z = robot0_wx + robot0_vx*(ky*e2 + kth*sin(e3)) ;    
         }
         else 
         {    
-            /*
-        	delta_l = sqrt(pow(goal_y-robot2_y,2) + pow(goal_x-robot2_x,2))   ;
-        	theta = atan2(goal_y-robot2_y,goal_x-robot2_x)                    ;
-        	e_theta = theta - robot2_yaw ;
-        	e_orientation = robot0_yaw - robot2_yaw ;
-        	e_s = delta_l*cos(e_theta) ;
-        	vel_msg.linear.x  = k_s*e_s ;
-        	if (delta_l > 0.5)
-        	{
-        		vel_msg.angular.z = k_theta*e_theta ;
-        	}
-        	else
-        	{
-        		vel_msg.angular.z = k_orientation*e_orientation ;
-        	}
-            */
             vel_msg.linear.x = 0 ;
             vel_msg.angular.z = 0 ;
-            cmd_vel_pub.publish(vel_msg) ;
         }
+
+        cmd_vel_pub.publish(vel_msg) ;
+
+        debug_msg.linear.x =  e1               ;
+        debug_msg.linear.y =  e2               ;
+        debug_msg.linear.z =  e3             ;
+        debug_msg.angular.x = robot0_vx                 ;
+        debug_msg.angular.y = vel_msg.linear.x                   ;
+        debug_msg.angular.z = vel_msg.angular.z                   ;
+        debug_pub.publish(debug_msg)                   ;
         
 
         then = now;
-
         ros::spinOnce();
 	}
 	else 
@@ -452,7 +436,7 @@ void formation_control::spin()
     while (ros::ok())
 	{
 	   update();
-           write_data("/home/kmondal/catkin_ws/src/robot_hardware/data/robot2_data.txt") ;           
+           //write_data("/home/kmondal/catkin_ws/src/robot_hardware/data/robot2_data.txt") ;           
 	   loop_rate.sleep();
 	}
 }

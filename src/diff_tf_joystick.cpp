@@ -83,7 +83,7 @@ Odometry_calc::Odometry_calc()
         // cmd_vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 50) ; 
 
         // Publish debug message
-        debug_pub = n.advertise<geometry_msgs::Twist>("debug",50);
+        // debug_pub = n.advertise<geometry_msgs::Twist>("debug",50);
 }
 
 void Odometry_calc::init_variables()
@@ -99,7 +99,7 @@ void Odometry_calc::init_variables()
         arduino_vd = 0 ;
         arduino_wd = 0 ;
 
-	rate = 50;
+	rate = 500;
 
 	t_delta = ros::Duration(1.0 / rate);
 	t_next = ros::Time::now() + t_delta;
@@ -245,6 +245,7 @@ void Odometry_calc::update()
                 cmd_vel_pub.publish(cmd_data); */
 
                 // Debug message
+                /*
                 debug_msg.linear.x = theta_final*(180/3.14);
                 debug_msg.linear.y = 0 ;
                 debug_msg.linear.z = dtheta ;
@@ -252,6 +253,7 @@ void Odometry_calc::update()
                 debug_msg.angular.y = 0 ;
                 debug_msg.angular.z = arduino_wd ;
                 debug_pub.publish(debug_msg);
+                */
 
                 then = now;
                 ros::spinOnce();
